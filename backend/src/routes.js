@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { query } from './config/db.js';
 import { sendSuccess } from './utils/response.js';
+import authRoutes from './modules/auth/auth.routes.js';
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.get('/health', async (req, res) => {
 
 // Modul fitur didaftarkan di sini saat dibuat, contoh:
 // router.use('/auth', authRoutes);
+router.use('/auth', authRoutes);
 
 export default router;
