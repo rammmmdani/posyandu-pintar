@@ -1,1 +1,30 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+
+  --color-daun-50: #eef6f1;
+  --color-daun-100: #d9ebe0;
+  --color-daun-600: #1f7a5c;
+  --color-daun-700: #186349;
+  --color-daun-900: #0f3d2e;
+
+  --color-kertas: #f6f8f6;
+  --color-tinta: #1b2b26;
+  --color-redam: #5b6b65;
+  --color-garis: #d6e0da;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-kertas);
+    color: var(--color-tinta);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Fokus keyboard selalu terlihat */
+  :focus-visible {
+    outline: 2px solid var(--color-daun-600);
+    outline-offset: 2px;
+  }
+}

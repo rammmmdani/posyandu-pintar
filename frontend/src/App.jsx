@@ -1,58 +1,66 @@
-import { Routes, Route } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { api } from "./services/api";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import AppLayout from "./layouts/AppLayout";
+import LoginPage from "./features/auth/LoginPage";
+import PlaceholderPage from "./components/PlaceholderPage";
 
-function HealthCheckPage() {
-  const [state, setState] = useState({ loading: true, ok: false, message: "" });
-
-  useEffect(() => {
-    api
-      .get("/health")
-      .then((res) =>
-        setState({ loading: false, ok: true, message: res.data.message }),
-      )
-      .catch(() =>
-        setState({
-          loading: false,
-          ok: false,
-          message: "Tidak dapat terhubung ke backend",
-        }),
-      );
-  }, []);
-
-  return (
-    <main className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
-      <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-teal-700">
-          Posyandu Pintar
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Uji koneksi frontend dan backend
-        </p>
-        <p
-          className={`mt-4 rounded-lg px-3 py-2 text-sm font-medium ${
-            state.loading
-              ? "bg-slate-100 text-slate-600"
-              : state.ok
-                ? "bg-emerald-50 text-emerald-700"
-                : "bg-red-50 text-red-700"
-          }`}
-        >
-          {state.loading
-            ? "Memeriksa..."
-            : state.ok
-              ? `Terhubung: ${state.message}`
-              : state.message}
-        </p>
-      </div>
-    </main>
-  );
+// Kader mendarat di Data Balita, koordinator di Dashboard.
+function HomeRedirect() {
+  const { isKoordinator } = useAuth();
+  return <Navigate to={isKoordinator ? "/dashboard" : "/balita"} replace />;
 }
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<HealthCheckPage />} />
+      <Route path="/login" element={<LoginPage />} />
+
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route index element={<HomeRedirect />} />
+          <Route
+            path="balita"
+            element={<PlaceholderPage title="Data Balita" />}
+          />
+          <Route
+            path="pengukuran"
+            element={<PlaceholderPage title="Pengukuran" />}
+          />
+          <Route
+            path="grafik"
+            element={<PlaceholderPage title="Grafik Pertumbuhan" />}
+          />
+          <Route
+            path="peringatan"
+            element={<PlaceholderPage title="Peringatan dan Tindak Lanjut" />}
+          />
+          <Route
+            path="menu"
+            element={<PlaceholderPage title="Rekomendasi Menu" />}
+          />
+
+          <Route element={<ProtectedRoute roles={["koordinator"]} />}>
+            <Route
+              path="dashboard"
+              element={<PlaceholderPage title="Dashboard" />}
+            />
+            <Route
+              path="laporan"
+              element={<PlaceholderPage title="Laporan" />}
+            />
+            <Route
+              path="pengaturan"
+              element={<PlaceholderPage title="Pengaturan Akun" />}
+            />
+          </Route>
+        </Route>
+      </Route>
+
+      <Route
+        path="*"
+        element={<PlaceholderPage title="Halaman tidak ditemukan" />}
+      />
     </Routes>
   );
 }
