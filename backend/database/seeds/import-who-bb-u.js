@@ -33,7 +33,7 @@ async function readRows(filePath, gender) {
   try {
     await workbook.xlsx.readFile(filePath);
   } catch (error) {
-    if (error.code === "ENOENT") {
+    if (error.code === "ENOENT" || error.message?.includes("File not found")) {
       throw new Error(`File Excel tidak ditemukan: ${filePath}`);
     }
 
