@@ -1,0 +1,6 @@
+Indikator    : Berat badan menurut umur (BB/U), 0-5 tahun, z-score
+Sumber       : https://www.who.int/tools/child-growth-standards/standards/weight-for-age
+Tanggal unduh: 19-11-2026
+Diunduh oleh : Hylmi
+Versi        : WHO Child Growth Standards 2006
+Catatan      : File per minggu (0-13 minggu) tidak diimpor.
