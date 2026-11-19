@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-const required = ['DATABASE_URL'];
+const required = ['DATABASE_URL', 'JWT_SECRET'];
 for (const key of required) {
   if (!process.env[key]) {
     throw new Error(`Environment variable ${key} belum diisi. Periksa file .env`);
