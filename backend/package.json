@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "seed:demo": "node database/seeds/seed-demo.js"
+    "seed:demo": "node database/seeds/seed-demo.js",
+    "import:who-bb-u": "node database/seeds/import-who-bb-u.js"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +26,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "exceljs": "^4.4.0",
     "nodemon": "^3.1.14"
   }
 }
