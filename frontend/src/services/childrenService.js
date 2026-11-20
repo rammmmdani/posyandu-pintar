@@ -38,4 +38,5 @@ export async function getConsents(id) {
 export async function addConsent(id, payload) {
   const res = await api.post(`/children/${id}/consents`, payload);
   return res.data;
+
 }
