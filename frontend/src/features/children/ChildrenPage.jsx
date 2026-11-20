@@ -31,7 +31,8 @@ export default function ChildrenPage() {
   useEffect(() => {
     let cancelled = false;
     setState((s) => ({ ...s, loading: true, error: '' }));
-    getChildren({ page, q: q || undefined, status })
+    getChildren({ page, search: q || undefined, status })
+    getChildren({ page, search: q || undefined, status })
       .then((res) => {
         if (!cancelled) setState({ loading: false, error: '', rows: res.data, meta: res.meta });
       })
@@ -69,7 +70,8 @@ export default function ChildrenPage() {
       key: 'consent',
       header: 'Persetujuan',
       render: (c) => {
-        const badge = CONSENT_BADGE[c.consent_status];
+        const badge = CONSENT_BADGE[c.consent_status] || CONSENT_BADGE.belum_ada;
+        const badge = CONSENT_BADGE[c.consent_status] || CONSENT_BADGE.belum_ada;
         return <Badge tone={badge.tone}>{badge.label}</Badge>;
       },
     },
