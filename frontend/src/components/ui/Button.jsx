@@ -5,6 +5,13 @@ const variants = {
   ghost: "text-daun-700 hover:bg-daun-50",
 };
 
+const base =
+  "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60";
+
+// Dipakai juga untuk <Link>: <Link className={buttonClass('primary')}>
+export const buttonClass = (variant = "primary", extra = "") =>
+  `${base} ${variants[variant]} ${extra}`;
+
 export default function Button({
   variant = "primary",
   loading = false,
@@ -18,7 +25,7 @@ export default function Button({
     <button
       type={type}
       disabled={disabled || loading}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${className}`}
+      className={buttonClass(variant, className)}
       {...props}
     >
       {loading && (
