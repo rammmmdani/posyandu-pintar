@@ -4,6 +4,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import AppLayout from "./layouts/AppLayout";
 import LoginPage from "./features/auth/LoginPage";
 import PlaceholderPage from "./components/PlaceholderPage";
+import ChildrenPage from './features/children/ChildrenPage';
 
 // Kader mendarat di Data Balita, koordinator di Dashboard.
 function HomeRedirect() {
@@ -19,9 +20,8 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route index element={<HomeRedirect />} />
-          <Route
-            path="balita"
-            element={<PlaceholderPage title="Data Balita" />}
+          <Route 
+            path="balita" element={<ChildrenPage />} 
           />
           <Route
             path="pengukuran"

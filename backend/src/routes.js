@@ -1,3 +1,4 @@
+
 import { Router } from 'express';
 import { query } from './config/db.js';
 import { sendSuccess } from './utils/response.js';
@@ -15,10 +16,8 @@ router.get('/health', async (req, res) => {
   });
 });
 
-// Modul fitur didaftarkan di sini saat dibuat, contoh:
-// router.use('/auth', authRoutes);
 router.use('/auth', authRoutes);
-router.use(measurementRoutes);
 router.use('/children', childrenRoutes);
+router.use(measurementRoutes);
 
 export default router;

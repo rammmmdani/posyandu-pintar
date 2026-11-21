@@ -1,12 +1,15 @@
+
 import pg from 'pg';
 import { env } from './env.js';
 
 // Samakan tipe data dengan API Contract.
-pg.types.setTypeParser(20, (v) => Number(v));      // BIGINT  -> number
+pg.types.setTypeParser(20, (v) => Number(v));       // BIGINT -> number
 pg.types.setTypeParser(1700, (v) => parseFloat(v)); // NUMERIC -> number
-pg.types.setTypeParser(1082, (v) => v);             // DATE    -> 'YYYY-MM-DD'
+pg.types.setTypeParser(1082, (v) => v);             // DATE -> 'YYYY-MM-DD'
 
-export const pool = new pg.Pool({ connectionString: env.databaseUrl });
+export const pool = new pg.Pool({
+  connectionString: env.databaseUrl,
+});
 
 // Selalu gunakan parameter ($1, $2) agar aman dari SQL injection.
 export const query = (text, params) => pool.query(text, params);
@@ -15,26 +18,9 @@ export async function testConnection() {
   await pool.query('SELECT 1');
 }
 
-export async function addConsent(user, id, input, ip) {
-  await getOrFail(user, id);
-  const consentId = await repo.insertConsent(pool, {
-    child_id: id,
-    ...input,
-    recorded_by: user.id,
-  });
-  await logAudit({
-    userId: user.id,
-    action: `consent_${input.consent_status}`,
-    entityType: 'guardian_consent',
-    entityId: consentId,
-    newData: { child_id: id, method: input.method, notice_version: input.notice_version },
-    ip,
-  });
-  return repo.findConsent(consentId);
-}
-
 export async function withTransaction(fn) {
   const client = await pool.connect();
+
   try {
     await client.query('BEGIN');
     const result = await fn(client);
