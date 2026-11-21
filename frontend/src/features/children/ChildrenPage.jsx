@@ -71,7 +71,6 @@ export default function ChildrenPage() {
       header: 'Persetujuan',
       render: (c) => {
         const badge = CONSENT_BADGE[c.consent_status] || CONSENT_BADGE.belum_ada;
-        const badge = CONSENT_BADGE[c.consent_status] || CONSENT_BADGE.belum_ada;
         return <Badge tone={badge.tone}>{badge.label}</Badge>;
       },
     },
