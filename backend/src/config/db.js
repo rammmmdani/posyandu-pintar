@@ -14,3 +14,36 @@ export const query = (text, params) => pool.query(text, params);
 export async function testConnection() {
   await pool.query('SELECT 1');
 }
+
+export async function addConsent(user, id, input, ip) {
+  await getOrFail(user, id);
+  const consentId = await repo.insertConsent(pool, {
+    child_id: id,
+    ...input,
+    recorded_by: user.id,
+  });
+  await logAudit({
+    userId: user.id,
+    action: `consent_${input.consent_status}`,
+    entityType: 'guardian_consent',
+    entityId: consentId,
+    newData: { child_id: id, method: input.method, notice_version: input.notice_version },
+    ip,
+  });
+  return repo.findConsent(consentId);
+}
+
+export async function withTransaction(fn) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await fn(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
