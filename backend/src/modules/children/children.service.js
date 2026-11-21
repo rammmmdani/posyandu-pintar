@@ -1,9 +1,10 @@
-import { withTransaction } from '../../config/db.js';
+import { pool, withTransaction } from '../../config/db.js';
 import { MAX_AGE_MONTHS } from '../../config/constants.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { ageInMonths, todayString } from '../../utils/dates.js';
 import { logAudit } from '../../utils/audit.js';
 import * as repo from './children.repository.js';
+import * as measurementRepo from '../measurements/measurements.repository.js';
 
 function assertBirthDate(birthDate) {
   if (!birthDate) return; // tanggal lahir boleh belum diketahui
@@ -34,8 +35,11 @@ export async function listChildren(user, { page, limit, q, status }) {
 
 export async function getChild(user, id) {
   const child = await getOrFail(user, id);
-  // latest_measurement diisi pada Langkah 3.4 saat modul pengukuran dibuat.
-  return { ...child, latest_measurement: null };
+
+  return {
+    ...child,
+    latest_measurement: await measurementRepo.findLatestByChild(id),
+  };
 }
 
 export async function createChild(user, input, ip) {
@@ -130,18 +134,25 @@ export async function listConsents(user, id) {
 
 export async function addConsent(user, id, input, ip) {
   await getOrFail(user, id);
-  const consentId = await repo.insertConsent(null ?? (await import('../../config/db.js')).pool, {
+
+  const consentId = await repo.insertConsent(pool, {
     child_id: id,
     ...input,
     recorded_by: user.id,
   });
+
   await logAudit({
     userId: user.id,
     action: `consent_${input.consent_status}`,
     entityType: 'guardian_consent',
     entityId: consentId,
-    newData: { child_id: id, method: input.method, notice_version: input.notice_version },
+    newData: {
+      child_id: id,
+      method: input.method,
+      notice_version: input.notice_version,
+    },
     ip,
   });
+
   return repo.findConsent(consentId);
 }
