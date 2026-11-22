@@ -14,3 +14,6 @@ export function formatDate(value) {
   const [y, m, d] = value.slice(0, 10).split('-');
   return `${d}/${m}/${y}`;
 }
+
+// Tanggal hari ini di perangkat (YYYY-MM-DD), untuk atribut max pada input tanggal.
+export const todayISO = () => new Date().toLocaleDateString('en-CA');

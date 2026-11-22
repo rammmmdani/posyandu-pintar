@@ -5,6 +5,8 @@ import AppLayout from "./layouts/AppLayout";
 import LoginPage from "./features/auth/LoginPage";
 import PlaceholderPage from "./components/PlaceholderPage";
 import ChildrenPage from './features/children/ChildrenPage';
+import ChildFormPage from './features/children/ChildFormPage';
+import ChildDetailPage from './features/children/ChildDetailPage';
 
 // Kader mendarat di Data Balita, koordinator di Dashboard.
 function HomeRedirect() {
@@ -20,9 +22,10 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route index element={<HomeRedirect />} />
-          <Route 
-            path="balita" element={<ChildrenPage />} 
-          />
+          <Route path="balita" element={<ChildrenPage />} />
+          <Route path="balita/baru" element={<ChildFormPage />} />
+          <Route path="balita/:id" element={<ChildDetailPage />} />
+          <Route path="balita/:id/ubah" element={<ChildFormPage />} />
           <Route
             path="pengukuran"
             element={<PlaceholderPage title="Pengukuran" />}
