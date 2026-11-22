@@ -1,3 +1,4 @@
+
 import { ApiError } from '../utils/ApiError.js';
 import { env } from '../config/env.js';
 
@@ -9,12 +10,15 @@ export function notFound(req, res, next) {
 // eslint-disable-next-line no-unused-vars
 export function errorHandler(err, req, res, next) {
   if (err instanceof ApiError) {
-    return res.status(err.statusCode).json({
+    const body = {
       success: false,
       message: err.message,
       code: err.code,
       errors: err.errors,
-    });
+    };
+
+    if (err.data !== undefined) body.data = err.data;
+    return res.status(err.statusCode).json(body);
   }
 
   // JSON rusak dari client
