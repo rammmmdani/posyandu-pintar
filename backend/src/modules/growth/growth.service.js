@@ -11,6 +11,11 @@ import {
   DAYS_PER_MONTH,
   MAX_AGE_MONTHS,
 } from "./growth.config.js";
+import {
+  createAlertsForAssessment,
+  closeAlertsForMeasurement,
+} from "../alerts/alerts.service.js";
+
 const INDICATORS = {
   bb_u: { label: "Berat badan menurut umur" },
   tb_u: { label: "Panjang/tinggi badan menurut umur" },
@@ -125,8 +130,10 @@ async function computeBmiForAge(child, m, age, pos) {
 
 export async function assessMeasurement({ child, measurement }) {
   // Data yang ditandai perlu diperiksa tidak dipakai untuk penilaian.
-  if (measurement.validity_status === "perlu_diperiksa")
+  if (measurement.validity_status === "perlu_diperiksa") {
+    await closeAlertsForMeasurement(measurement.id);
     return { assessment: null, alerts: [] };
+  }
 
   const age = child.birth_date
     ? {
@@ -172,8 +179,17 @@ export async function assessMeasurement({ child, measurement }) {
     reference_version: REFERENCE_VERSION,
     calculation_version: CALCULATION_VERSION,
   });
+
   const row = await repo.findById(id);
-  return { assessment: toAssessmentObject(row), alerts: [] }; // peringatan dibuat di Langkah 3.5
+  const assessment = toAssessmentObject(row);
+
+  const alerts = await createAlertsForAssessment({
+    child,
+    measurement,
+    assessment,
+  });
+
+  return { assessment, alerts };
 }
 
 function decodeNote(note) {
@@ -234,8 +250,8 @@ function toAssessmentObject(row) {
   };
 }
 
-export async function getLatestAssessment(measurementId) {
-  const row = await repo.findLatestByMeasurement(measurementId);
+export async function getAssessmentById(id) {
+  const row = await repo.findById(id);
   return row ? toAssessmentObject(row) : null;
 }
 

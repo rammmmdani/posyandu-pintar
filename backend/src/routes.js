@@ -5,8 +5,9 @@ import authRoutes from "./modules/auth/auth.routes.js";
 import childrenRoutes from "./modules/children/children.routes.js";
 import measurementRoutes from "./modules/measurements/measurements.routes.js";
 import growthRoutes from "./modules/growth/growth.routes.js";
-import usersRoutes from './modules/users/users.routes.js';
-import notificationsRoutes from './modules/notifications/notifications.routes.js';
+import usersRoutes from "./modules/users/users.routes.js";
+import notificationsRoutes from "./modules/notifications/notifications.routes.js";
+import alertsRoutes from "./modules/alerts/alerts.routes.js";
 
 const router = Router();
 
@@ -22,7 +23,8 @@ router.use("/auth", authRoutes);
 router.use(measurementRoutes);
 router.use(growthRoutes);
 router.use("/children", childrenRoutes);
-router.use('/users', usersRoutes);
-router.use('/notifications', notificationsRoutes);
+router.use("/users", usersRoutes);
+router.use("/notifications", notificationsRoutes);
+router.use("/alerts", alertsRoutes);
 
 export default router;
