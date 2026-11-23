@@ -1,10 +1,12 @@
 export const REFERENCE_VERSION = "who-2006";
-export const CALCULATION_VERSION = "0.1.0";
+export const CALCULATION_VERSION = "0.2.0";
 
-// Aturan sementara: usia boleh melebihi baris referensi terakhir paling banyak 30 hari
-// (bulan penuh terakhir). Lebih dari itu dianggap di luar cakupan. Verifikasi bersama aturan usia WHO.
+// Aturan cakupan tambahan dari implementasi LHFA.
 export const COVERAGE_EXTRA_DAYS = 30;
-
-// Usia (hari) mulai dipakainya tinggi berdiri (24 bulan = Math.round(24 * 30,4375)).
-// Di bawahnya memakai panjang berbaring. Verifikasi aturan ini pada dokumentasi WHO.
 export const STANDING_FROM_DAYS = 731;
+
+// Konfigurasi usia dan posisi pengukuran.
+export const DAYS_PER_MONTH = 30.4375;
+export const MAX_AGE_MONTHS = 60;
+export const BOUNDARY_MONTHS = 24;
+export const POSITION_CORRECTION_CM = 0.7;

@@ -163,6 +163,7 @@ CREATE TABLE alerts (
     recommendation TEXT        NOT NULL,
     status         TEXT        NOT NULL DEFAULT 'baru'
                    CHECK (status IN ('baru', 'dilihat', 'ditindaklanjuti', 'ditutup')),
+    status_note    TEXT,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );

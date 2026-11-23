@@ -15,6 +15,27 @@ export async function findReference(indicator, gender, ageDays, version) {
   return rows[0] || null;
 }
 
+// Dua baris yang mengapit nilai panjang/tinggi: terbesar yang <= nilai dan terkecil yang >= nilai.
+export async function findBracket(indicator, gender, value, version) {
+  const base = `SELECT measurement_value AS v, l, m, s FROM who_growth_references
+                WHERE indicator = $1 AND gender = $2 AND reference_version = $3 AND measurement_value`;
+  const [lower, upper] = await Promise.all([
+    pool.query(`${base} <= $4 ORDER BY measurement_value DESC LIMIT 1`, [
+      indicator,
+      gender,
+      version,
+      value,
+    ]),
+    pool.query(`${base} >= $4 ORDER BY measurement_value ASC LIMIT 1`, [
+      indicator,
+      gender,
+      version,
+      value,
+    ]),
+  ]);
+  return { lower: lower.rows[0] || null, upper: upper.rows[0] || null };
+}
+
 export async function insertAssessment(a) {
   const { rows } = await pool.query(
     `INSERT INTO growth_assessments

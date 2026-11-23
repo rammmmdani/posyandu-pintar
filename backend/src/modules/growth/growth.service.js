@@ -1,94 +1,126 @@
 import * as repo from "./growth.repository.js";
 import { ageInDays } from "./age.js";
 import { lmsZScore, roundZ } from "./zscore.js";
+import { interpolateLms } from "./interpolate.js";
 import { categorize, labelFor } from "./categories.js";
+import { resolveLengthHeight } from "./position.js";
 import { ageInMonths } from "../../utils/dates.js";
 import {
   REFERENCE_VERSION,
   CALCULATION_VERSION,
-  COVERAGE_EXTRA_DAYS,
-  STANDING_FROM_DAYS,
+  DAYS_PER_MONTH,
+  MAX_AGE_MONTHS,
 } from "./growth.config.js";
-
 const INDICATORS = {
   bb_u: { label: "Berat badan menurut umur" },
   tb_u: { label: "Panjang/tinggi badan menurut umur" },
   bb_tb: { label: "Berat badan menurut panjang/tinggi badan" },
   imt_u: { label: "IMT menurut umur" },
 };
-const MODE = {
-  tb_u: { recumbent: "pb_u", standing: "tb_u" },
-  bb_tb: { recumbent: "bb_pb", standing: "bb_tb" },
-};
-const NOT_YET = "Referensi untuk indikator ini belum tersedia";
-const NO_CATEGORY =
-  "Kategori belum dikonfigurasi (menunggu verifikasi Permenkes No. 2 Tahun 2020)";
+const NO_CATEGORY = "Kategori belum dapat ditentukan";
 
 const unavailable = (reason) => ({ zscore: null, categoryCode: null, reason });
 
-async function computeBbU(child, m, ageDays) {
-  if (!child.birth_date) return unavailable("Tanggal lahir belum diketahui");
-  if (m.weight_kg === null) return unavailable("Berat badan belum diisi");
+// Permenkes: umur dihitung dalam BULAN PENUH. Kunci tabel referensi = bulan x 30,4375 hari.
+const lookupDays = (months) => Math.round(months * DAYS_PER_MONTH);
 
-  const ref = await repo.findReference(
-    "bb_u",
-    child.gender,
-    ageDays,
-    REFERENCE_VERSION,
-  );
-  if (!ref) return unavailable("Referensi untuk usia ini belum tersedia");
-  if (ageDays > ref.max_age + COVERAGE_EXTRA_DAYS)
-    return unavailable("Usia di luar cakupan referensi");
-
-  // adjustTails untuk BB/U: verifikasi pada dokumen teknis WHO (lihat zscore.js).
-  const zscore = roundZ(lmsZScore(m.weight_kg, ref, { adjustTails: true }));
-  const category = categorize("bb_u", zscore);
+// Kategori ditentukan dari z-score tanpa pembulatan; yang disimpan dan ditampilkan dibulatkan dua desimal.
+function finish(indicator, zRaw) {
+  const category = categorize(indicator, zRaw);
   return {
-    zscore,
+    zscore: roundZ(zRaw),
     categoryCode: category ? category.code : null,
     reason: category ? null : NO_CATEGORY,
   };
 }
 
-// PB/U (berbaring, di bawah 24 bulan) atau TB/U (berdiri, 24 bulan ke atas).
-// Tabel dipilih dari cara pengukuran yang dicatat. Tidak ada koreksi otomatis antar-cara ukur.
-async function computeLengthHeightForAge(child, m, ageDays) {
-  if (!child.birth_date) return unavailable("Tanggal lahir belum diketahui");
-  if (m.height_cm === null)
-    return unavailable("Panjang/tinggi badan belum diisi");
-  if (!m.measurement_type) return unavailable("Cara pengukuran belum diisi");
+function missingInput(age, m, { weight = false, height = false }) {
+  if (age.months == null) return "Tanggal lahir belum diketahui";
 
-  const recumbent = m.measurement_type === "recumbent";
-  if (recumbent && ageDays >= STANDING_FROM_DAYS) {
-    return unavailable(
-      "Diukur berbaring pada usia 24 bulan atau lebih. Ukur ulang dengan posisi berdiri (tinggi badan).",
-    );
-  }
-  if (!recumbent && ageDays < STANDING_FROM_DAYS) {
-    return unavailable(
-      "Diukur berdiri pada usia di bawah 24 bulan. Ukur ulang dengan posisi berbaring (panjang badan).",
-    );
+  if (age.months > MAX_AGE_MONTHS) {
+    return "Usia di luar cakupan referensi (0 sampai 60 bulan)";
   }
 
-  const table = recumbent ? "pb_u" : "tb_u";
+  if (weight && m.weight_kg == null) {
+    return "Berat badan belum diisi";
+  }
+
+  if (height && m.height_cm == null) {
+    return "Panjang/tinggi badan belum diisi";
+  }
+
+  if (height && !m.measurement_type) {
+    return "Cara pengukuran belum diisi";
+  }
+
+  return null;
+}
+
+async function computeBbU(child, m, age) {
+  const missing = missingInput(age, m, { weight: true });
+  if (missing) return unavailable(missing);
   const ref = await repo.findReference(
-    table,
+    "bb_u",
     child.gender,
-    ageDays,
+    lookupDays(age.months),
     REFERENCE_VERSION,
   );
   if (!ref) return unavailable("Referensi untuk usia ini belum tersedia");
-  if (ageDays > ref.max_age + COVERAGE_EXTRA_DAYS)
-    return unavailable("Usia di luar cakupan referensi");
+  // adjustTails untuk BB/U: verifikasi pada dokumen teknis WHO (lihat zscore.js).
+  return finish("bb_u", lmsZScore(m.weight_kg, ref, { adjustTails: true }));
+}
 
-  // Tanpa penyesuaian ekor untuk panjang/tinggi menurut umur (verifikasi pada dokumen teknis WHO).
-  const zscore = roundZ(lmsZScore(m.height_cm, ref, { adjustTails: false }));
-  const category = categorize("tb_u", zscore); // satu set kategori untuk PB/U dan TB/U
-  return {
-    zscore,
-    categoryCode: category ? category.code : null,
-    reason: category ? null : NO_CATEGORY,
-  };
+// PB/U atau TB/U (tanpa penyesuaian ekor). Tinggi yang dipakai sudah dikoreksi sesuai cara ukur.
+async function computeLengthHeightForAge(child, m, age, pos) {
+  const missing = missingInput(age, m, { height: true });
+  if (missing) return unavailable(missing);
+  const table = pos.table === "pb" ? "pb_u" : "tb_u";
+  const ref = await repo.findReference(
+    table,
+    child.gender,
+    lookupDays(age.months),
+    REFERENCE_VERSION,
+  );
+  if (!ref) return unavailable("Referensi untuk usia ini belum tersedia");
+  return finish("tb_u", lmsZScore(pos.height, ref, { adjustTails: false }));
+}
+
+// BB/PB atau BB/TB. Kunci tabel = panjang/tinggi (setelah koreksi), diinterpolasi antar-baris 0,5 cm.
+async function computeWeightForLengthHeight(child, m, age, pos) {
+  const missing = missingInput(age, m, { weight: true, height: true });
+  if (missing) return unavailable(missing);
+  const table = pos.table === "pb" ? "bb_pb" : "bb_tb";
+  const { lower, upper } = await repo.findBracket(
+    table,
+    child.gender,
+    pos.height,
+    REFERENCE_VERSION,
+  );
+  const ref = interpolateLms(lower, upper, pos.height);
+  if (!ref)
+    return unavailable("Panjang/tinggi badan di luar cakupan referensi");
+  return finish("bb_tb", lmsZScore(m.weight_kg, ref, { adjustTails: true }));
+}
+
+// IMT/U. Pada tepat 24 bulan: telentang memakai baris tabel PB (730), berdiri memakai baris tabel TB (731).
+async function computeBmiForAge(child, m, age, pos) {
+  const missing = missingInput(age, m, { weight: true, height: true });
+  if (missing) return unavailable(missing);
+  const days =
+    age.months === 24
+      ? pos.table === "pb"
+        ? 730
+        : 731
+      : lookupDays(age.months);
+  const ref = await repo.findReference(
+    "imt_u",
+    child.gender,
+    days,
+    REFERENCE_VERSION,
+  );
+  if (!ref) return unavailable("Referensi untuk usia ini belum tersedia");
+  const bmi = m.weight_kg / Math.pow(pos.height / 100, 2);
+  return finish("imt_u", lmsZScore(bmi, ref, { adjustTails: true }));
 }
 
 export async function assessMeasurement({ child, measurement }) {
@@ -96,25 +128,30 @@ export async function assessMeasurement({ child, measurement }) {
   if (measurement.validity_status === "perlu_diperiksa")
     return { assessment: null, alerts: [] };
 
-  const ageDays = child.birth_date
-    ? ageInDays(child.birth_date, measurement.measurement_date)
-    : null;
+  const age = child.birth_date
+    ? {
+        days: ageInDays(child.birth_date, measurement.measurement_date),
+        months: ageInMonths(child.birth_date, measurement.measurement_date),
+      }
+    : { days: null, months: null };
+
+  const canPosition =
+    age.months !== null &&
+    measurement.height_cm !== null &&
+    measurement.measurement_type;
+  const pos = canPosition ? resolveLengthHeight(measurement, age.months) : null;
+
   const results = {
-    bb_u: await computeBbU(child, measurement, ageDays),
-    tb_u: await computeLengthHeightForAge(child, measurement, ageDays),
-    bb_tb: unavailable(
-      child.birth_date ? NOT_YET : "Tanggal lahir belum diketahui",
-    ),
-    imt_u: unavailable(
-      child.birth_date ? NOT_YET : "Tanggal lahir belum diketahui",
-    ),
+    bb_u: await computeBbU(child, measurement, age),
+    tb_u: await computeLengthHeightForAge(child, measurement, age, pos),
+    bb_tb: await computeWeightForLengthHeight(child, measurement, age, pos),
+    imt_u: await computeBmiForAge(child, measurement, age, pos),
   };
 
-  const keys = Object.keys(results);
   const z = {};
   const cat = {};
   const reasons = {};
-  for (const k of keys) {
+  for (const k of Object.keys(results)) {
     z[k] = results[k].zscore;
     cat[k] = results[k].categoryCode;
     reasons[k] = results[k].reason;
@@ -122,10 +159,16 @@ export async function assessMeasurement({ child, measurement }) {
 
   const id = await repo.insertAssessment({
     measurement_id: measurement.id,
-    age_days: ageDays,
+    age_days: age.days,
     z,
     cat,
-    note: JSON.stringify({ reasons }), // alasan per indikator disimpan di overall_note
+    // Skema tidak punya kolom terpisah: alasan, usia bulan penuh, tabel, dan koreksi disimpan sebagai JSON.
+    note: JSON.stringify({
+      reasons,
+      age_months: age.months,
+      table: pos ? pos.table : null,
+      correction_cm: pos ? pos.correction : 0,
+    }),
     reference_version: REFERENCE_VERSION,
     calculation_version: CALCULATION_VERSION,
   });
@@ -133,44 +176,58 @@ export async function assessMeasurement({ child, measurement }) {
   return { assessment: toAssessmentObject(row), alerts: [] }; // peringatan dibuat di Langkah 3.5
 }
 
-function decodeReasons(note) {
+function decodeNote(note) {
   try {
-    return JSON.parse(note)?.reasons || {};
+    const n = JSON.parse(note);
+    return n && typeof n === "object" ? n : {};
   } catch {
     return {};
   }
 }
 
-function indicatorObject(key, row, reasons) {
-  const z = row[`zscore_${key}`];
+function indicatorObject(key, row, reasons, table) {
+  const zv = row[`zscore_${key}`];
   const code = row[`category_${key}`];
   const obj = { label: INDICATORS[key].label };
-  if (MODE[key]) obj.mode = MODE[key][row.measurement_type] ?? null;
-  obj.status = z === null || z === undefined ? "tidak_tersedia" : "dihitung";
-  obj.zscore = z ?? null;
+  if (key === "tb_u")
+    obj.mode = table ? (table === "pb" ? "pb_u" : "tb_u") : null;
+  if (key === "bb_tb")
+    obj.mode = table ? (table === "pb" ? "bb_pb" : "bb_tb") : null;
+  obj.status = zv === null || zv === undefined ? "tidak_tersedia" : "dihitung";
+  obj.zscore = zv ?? null;
   obj.category = code ? { code, label: labelFor(key, code) } : null;
   obj.reason = reasons[key] ?? null;
   return obj;
 }
 
 function toAssessmentObject(row) {
-  const reasons = decodeReasons(row.overall_note);
+  const n = decodeNote(row.overall_note);
   const indicators = {};
   for (const key of Object.keys(INDICATORS))
-    indicators[key] = indicatorObject(key, row, reasons);
-  const anyMissing = Object.values(indicators).some(
-    (i) => i.status === "tidak_tersedia",
-  );
+    indicators[key] = indicatorObject(key, row, n.reasons || {}, n.table);
+
+  const sentences = [];
+  if (n.correction_cm) {
+    const sign = n.correction_cm > 0 ? "+" : "";
+    sentences.push(
+      `Panjang/tinggi badan dikoreksi ${sign}${String(n.correction_cm).replace(".", ",")} cm sesuai Permenkes No. 2 Tahun 2020 karena cara ukur tidak sesuai usia.`,
+    );
+  }
+  if (Object.values(indicators).some((i) => i.status === "tidak_tersedia")) {
+    sentences.push("Sebagian indikator belum dapat dihitung.");
+  }
+
   return {
     id: row.id,
     measurement_id: row.measurement_id,
     age_days: row.age_days,
     age_months:
-      row.age_days === null ? null : Math.floor(row.age_days / 30.4375),
+      n.age_months ??
+      (row.age_days === null
+        ? null
+        : Math.floor(row.age_days / DAYS_PER_MONTH)),
     indicators,
-    overall_note: anyMissing
-      ? "Sebagian indikator belum dapat dihitung."
-      : null,
+    overall_note: sentences.length ? sentences.join(" ") : null,
     reference_version: row.reference_version,
     calculation_version: row.calculation_version,
     assessed_at: row.assessed_at,
