@@ -20,6 +20,7 @@ import AlertDetailPage from "./features/alerts/AlertDetailPage";
 
 // Halaman notifikasi
 import NotificationsPage from "./features/notifications/NotificationsPage";
+import ReportsPage from './features/reports/ReportsPage';
 
 // Kader mendarat di Data Balita, koordinator di Dashboard.
 function HomeRedirect() {
@@ -95,10 +96,7 @@ export default function App() {
               element={<PlaceholderPage title="Dashboard" />}
             />
 
-            <Route
-              path="laporan"
-              element={<PlaceholderPage title="Laporan" />}
-            />
+            <Route path="laporan" element={<ReportsPage />} />
 
             <Route
               path="pengaturan"
