@@ -38,3 +38,12 @@ test("berat nol atau negatif ditolak", () => {
   assert.throws(() => lmsZScore(0, BOYS_12M, opts));
   assert.throws(() => lmsZScore(-1, BOYS_12M, opts));
 });
+
+// L = 1 (panjang/tinggi menurut umur): z = (y/M - 1) / S, tanpa penyesuaian ekor.
+test("PB/U laki-laki 12 bulan: titik SD tabel WHO", () => {
+  const ref = { l: 1, m: 75.7488, s: 0.03137 };
+  const opts = { adjustTails: false };
+  assert.ok(Math.abs(lmsZScore(71.0, ref, opts) - -2) < 0.1);
+  assert.ok(Math.abs(lmsZScore(80.5, ref, opts) - 2) < 0.1);
+  assert.equal(roundZ(lmsZScore(82.9, ref, opts)), 3.01);
+});

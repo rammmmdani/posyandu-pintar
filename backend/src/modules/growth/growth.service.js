@@ -11,7 +11,6 @@ import {
   DAYS_PER_MONTH,
   MAX_AGE_MONTHS,
 } from "./growth.config.js";
-
 const INDICATORS = {
   bb_u: { label: "Berat badan menurut umur" },
   tb_u: { label: "Panjang/tinggi badan menurut umur" },
@@ -36,12 +35,24 @@ function finish(indicator, zRaw) {
 }
 
 function missingInput(age, m, { weight = false, height = false }) {
-  if (age.months === null) return "Tanggal lahir belum diketahui";
-  if (age.months > MAX_AGE_MONTHS)
+  if (age.months == null) return "Tanggal lahir belum diketahui";
+
+  if (age.months > MAX_AGE_MONTHS) {
     return "Usia di luar cakupan referensi (0 sampai 60 bulan)";
-  if (weight && m.weight_kg === null) return "Berat badan belum diisi";
-  if (height && m.height_cm === null) return "Panjang/tinggi badan belum diisi";
-  if (height && !m.measurement_type) return "Cara pengukuran belum diisi";
+  }
+
+  if (weight && m.weight_kg == null) {
+    return "Berat badan belum diisi";
+  }
+
+  if (height && m.height_cm == null) {
+    return "Panjang/tinggi badan belum diisi";
+  }
+
+  if (height && !m.measurement_type) {
+    return "Cara pengukuran belum diisi";
+  }
+
   return null;
 }
 
