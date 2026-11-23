@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
@@ -10,6 +11,7 @@ import { getErrorMessage } from '../../utils/errors';
 import { GENDER_LABEL, formatAge, formatDate } from '../../utils/format';
 import { PRIVACY_NOTICE } from './privacyNotice';
 import ChildGrowthSection from './ChildGrowthSection';
+import ChildAlertsCard from './ChildAlertsCard';
 
 import Alert from '../../components/ui/Alert';
 import Badge from '../../components/ui/Badge';
@@ -305,6 +307,9 @@ export default function ChildDetailPage() {
           </Field>
         </dl>
       </Card>
+
+      {/* Kartu peringatan */}
+      <ChildAlertsCard childId={id} />
 
       {/* Pengukuran / pertumbuhan */}
       <ChildGrowthSection
