@@ -7,6 +7,8 @@ import PlaceholderPage from "./components/PlaceholderPage";
 import ChildrenPage from './features/children/ChildrenPage';
 import ChildFormPage from './features/children/ChildFormPage';
 import ChildDetailPage from './features/children/ChildDetailPage';
+import ChildPickerPage from './features/children/ChildPickerPage';
+import MeasurementFormPage from './features/measurements/MeasurementFormPage';
 
 // Kader mendarat di Data Balita, koordinator di Dashboard.
 function HomeRedirect() {
@@ -26,14 +28,11 @@ export default function App() {
           <Route path="balita/baru" element={<ChildFormPage />} />
           <Route path="balita/:id" element={<ChildDetailPage />} />
           <Route path="balita/:id/ubah" element={<ChildFormPage />} />
-          <Route
-            path="pengukuran"
-            element={<PlaceholderPage title="Pengukuran" />}
-          />
-          <Route
-            path="grafik"
-            element={<PlaceholderPage title="Grafik Pertumbuhan" />}
-          />
+          <Route path="balita/:id/pengukuran/baru" element={<MeasurementFormPage />} />
+          <Route path="pengukuran" element={<PlaceholderPage title="Pengukuran" />} />
+          <Route path="pengukuran" element={<ChildPickerPage title="Pengukuran" description="Pilih balita untuk mencatat pengukuran." to={(c) => `/balita/${c.id}/pengukuran/baru`} actionLabel="Catat pengukuran" />} />
+          <Route path="grafik" element={<PlaceholderPage title="Grafik Pertumbuhan" />} />
+          <Route path="grafik" element={<ChildPickerPage title="Grafik Pertumbuhan" description="Pilih balita untuk melihat grafik dan riwayat." to={(c) => `/balita/${c.id}`} actionLabel="Lihat grafik" />} />
           <Route
             path="peringatan"
             element={<PlaceholderPage title="Peringatan dan Tindak Lanjut" />}
