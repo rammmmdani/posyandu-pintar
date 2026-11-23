@@ -9,7 +9,8 @@
     "seed:demo": "node database/seeds/seed-demo.js",
     "import:who-bb-u": "node database/seeds/import-who-bb-u.js",
     "import:who-lhfa": "node database/seeds/import-who-lhfa.js",
-    "import:who-weight-bmi": "node database/seeds/import-who-weight-bmi.js"
+    "import:who-weight-bmi": "node database/seeds/import-who-weight-bmi.js",
+    "seed:demo-data": "node database/seeds/seed-demo-data.js"
   },
   "keywords": [],
   "author": "",
