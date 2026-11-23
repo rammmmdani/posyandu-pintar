@@ -312,3 +312,10 @@ Response 404: balita tidak ditemukan. Response 400: `VALIDATION_ERROR`.
 1. Apakah `consent_status` dimasukkan ke daftar balita (3.1) seperti usulan di atas, atau frontend memanggil 4.1 per baris?
 2. Apakah `koordinator` dan `kader` punya hak yang sama untuk hapus balita?
 3. Apakah `PATCH` atau `PUT` yang dipakai untuk ubah data?
+
+Objek Alert (bagian 6): tambahkan field "status_note": null setelah "status". Nilainya terisi catatan saat peringatan ditutup.
+6.3 PATCH /alerts/:id/status: ganti isi aturan menjadi:
+1. Body: status bernilai dilihat atau ditutup. Status ditindaklanjuti tidak bisa dipilih manual, terbentuk otomatis saat tindak lanjut dicatat.
+2. note wajib saat ditutup.
+3. Transisi: baru ke dilihat; baru, dilihat, atau ditindaklanjuti ke ditutup; ditutup ke dilihat (buka kembali). Transisi lain: 400.
+6.2 GET /alerts/:id: tambahkan bahwa assessment adalah penilaian yang memicu peringatan (assessment_id), bukan penilaian terbaru.
