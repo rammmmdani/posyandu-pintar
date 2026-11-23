@@ -1,34 +1,31 @@
+import { Navigate, Route, Routes } from "react-router-dom";
 
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { useAuth } from "./context/AuthContext";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import AppLayout from "./layouts/AppLayout";
 
-import { useAuth } from './context/AuthContext';
-import ProtectedRoute from './routes/ProtectedRoute';
-import AppLayout from './layouts/AppLayout';
+import LoginPage from "./features/auth/LoginPage";
+import PlaceholderPage from "./components/PlaceholderPage";
 
-import LoginPage from './features/auth/LoginPage';
-import PlaceholderPage from './components/PlaceholderPage';
+import ChildrenPage from "./features/children/ChildrenPage";
+import ChildFormPage from "./features/children/ChildFormPage";
+import ChildDetailPage from "./features/children/ChildDetailPage";
+import ChildPickerPage from "./features/children/ChildPickerPage";
 
-import ChildrenPage from './features/children/ChildrenPage';
-import ChildFormPage from './features/children/ChildFormPage';
-import ChildDetailPage from './features/children/ChildDetailPage';
-import ChildPickerPage from './features/children/ChildPickerPage';
-
-import MeasurementFormPage from './features/measurements/MeasurementFormPage';
+import MeasurementFormPage from "./features/measurements/MeasurementFormPage";
 
 // Halaman peringatan
-import AlertsPage from './features/alerts/AlertsPage';
-import AlertDetailPage from './features/alerts/AlertDetailPage';
+import AlertsPage from "./features/alerts/AlertsPage";
+import AlertDetailPage from "./features/alerts/AlertDetailPage";
+
+// Halaman notifikasi
+import NotificationsPage from "./features/notifications/NotificationsPage";
 
 // Kader mendarat di Data Balita, koordinator di Dashboard.
 function HomeRedirect() {
   const { isKoordinator } = useAuth();
 
-  return (
-    <Navigate
-      to={isKoordinator ? '/dashboard' : '/balita'}
-      replace
-    />
-  );
+  return <Navigate to={isKoordinator ? "/dashboard" : "/balita"} replace />;
 }
 
 export default function App() {
@@ -78,15 +75,12 @@ export default function App() {
           />
 
           {/* Peringatan */}
-          <Route
-            path="peringatan"
-            element={<AlertsPage />}
-          />
+          <Route path="peringatan" element={<AlertsPage />} />
 
-          <Route
-            path="peringatan/:id"
-            element={<AlertDetailPage />}
-          />
+          <Route path="peringatan/:id" element={<AlertDetailPage />} />
+
+          {/* Notifikasi - dapat diakses semua role */}
+          <Route path="notifikasi" element={<NotificationsPage />} />
 
           {/* Rekomendasi Menu */}
           <Route
@@ -95,7 +89,7 @@ export default function App() {
           />
 
           {/* Khusus Koordinator */}
-          <Route element={<ProtectedRoute roles={['koordinator']} />}>
+          <Route element={<ProtectedRoute roles={["koordinator"]} />}>
             <Route
               path="dashboard"
               element={<PlaceholderPage title="Dashboard" />}
