@@ -1,204 +1,80 @@
-/**
- * KATEGORI STATUS GIZI ANAK
- *
- * Sumber:
- * Permenkes No. 2 Tahun 2020
- * Pasal 4 ayat (2), (3), (4), dan (5).
- * Lampiran halaman 14, bagian B:
- * Kategori dan Ambang Batas Status Gizi Anak.
- *
- * Cakupan: anak usia 0-60 bulan.
- * Batas menggunakan nilai Z-score.
- */
+// Sumber: Peraturan Menteri Kesehatan No. 2 Tahun 2020 tentang Standar Antropometri Anak,
+// Lampiran BAB II huruf B "Kategori dan Ambang Batas Status Gizi Anak" (hlm. 14), anak usia 0-60 bulan.
+//
+// Notasi dokumen dan artinya:
+//   "<-3 SD"            : z < -3
+//   "-3 SD sd <-2 SD"   : -3 <= z < -2
+//   "-2 SD sd +1 SD"    : -2 <= z <= +1
+//   "> +1 SD"           : z > +1
+//   "> +1 SD sd +2 SD"  : +1 < z <= +2
+const band = (code, label, min, max, minInclusive, maxInclusive) => ({
+  code,
+  label,
+  min,
+  max,
+  minInclusive,
+  maxInclusive,
+});
+
+// BB/PB, BB/TB, dan IMT/U (0-60 bulan) memakai kategori dan ambang batas yang sama.
+const gizi = (p) => [
+  band(`${p}_gizi_buruk`, "Gizi buruk", null, -3, false, false),
+  band(`${p}_gizi_kurang`, "Gizi kurang", -3, -2, true, false),
+  band(`${p}_gizi_baik`, "Gizi baik", -2, 1, true, true),
+  band(`${p}_berisiko_gizi_lebih`, "Berisiko gizi lebih", 1, 2, false, true),
+  band(`${p}_gizi_lebih`, "Gizi lebih", 2, 3, false, true),
+  band(`${p}_obesitas`, "Obesitas", 3, null, false, false),
+];
 
 export const CATEGORY_BANDS = {
-  // BB/U: Berat Badan menurut Umur (0-60 bulan)
   bb_u: [
-    {
-      code: "berat_badan_sangat_kurang",
-      label: "Berat badan sangat kurang",
-      min: null,
-      max: -3,
-      maxInclusive: false,
-    },
-    {
-      code: "berat_badan_kurang",
-      label: "Berat badan kurang",
-      min: -3,
-      minInclusive: true,
-      max: -2,
-      maxInclusive: false,
-    },
-    {
-      code: "berat_badan_normal",
-      label: "Berat badan normal",
-      min: -2,
-      minInclusive: true,
-      max: 1,
-      maxInclusive: true,
-    },
-    {
-      code: "risiko_berat_badan_lebih",
-      label: "Risiko berat badan lebih",
-      min: 1,
-      minInclusive: false,
-      max: null,
-    },
+    band(
+      "bbu_sangat_kurang",
+      "Berat badan sangat kurang",
+      null,
+      -3,
+      false,
+      false,
+    ),
+    band("bbu_kurang", "Berat badan kurang", -3, -2, true, false),
+    band("bbu_normal", "Berat badan normal", -2, 1, true, true),
+    band("bbu_risiko_lebih", "Risiko berat badan lebih", 1, null, false, false),
   ],
-
-  // PB/U atau TB/U: Panjang/Tinggi Badan menurut Umur (0-60 bulan)
   tb_u: [
-    {
-      code: "sangat_pendek",
-      label: "Sangat pendek",
-      min: null,
-      max: -3,
-      maxInclusive: false,
-    },
-    {
-      code: "pendek",
-      label: "Pendek",
-      min: -3,
-      minInclusive: true,
-      max: -2,
-      maxInclusive: false,
-    },
-    {
-      code: "normal",
-      label: "Normal",
-      min: -2,
-      minInclusive: true,
-      max: 3,
-      maxInclusive: true,
-    },
-    {
-      code: "tinggi",
-      label: "Tinggi",
-      min: 3,
-      minInclusive: false,
-      max: null,
-    },
+    band("tbu_sangat_pendek", "Sangat pendek", null, -3, false, false),
+    band("tbu_pendek", "Pendek", -3, -2, true, false),
+    band("tbu_normal", "Normal", -2, 3, true, true),
+    band("tbu_tinggi", "Tinggi", 3, null, false, false),
   ],
-
-  // BB/PB atau BB/TB: Berat Badan menurut Panjang/Tinggi Badan (0-60 bulan)
-  bb_tb: [
-    {
-      code: "gizi_buruk",
-      label: "Gizi buruk",
-      min: null,
-      max: -3,
-      maxInclusive: false,
-    },
-    {
-      code: "gizi_kurang",
-      label: "Gizi kurang",
-      min: -3,
-      minInclusive: true,
-      max: -2,
-      maxInclusive: false,
-    },
-    {
-      code: "gizi_baik",
-      label: "Gizi baik",
-      min: -2,
-      minInclusive: true,
-      max: 1,
-      maxInclusive: true,
-    },
-    {
-      code: "berisiko_gizi_lebih",
-      label: "Berisiko gizi lebih",
-      min: 1,
-      minInclusive: false,
-      max: 2,
-      maxInclusive: true,
-    },
-    {
-      code: "gizi_lebih",
-      label: "Gizi lebih",
-      min: 2,
-      minInclusive: false,
-      max: 3,
-      maxInclusive: true,
-    },
-    {
-      code: "obesitas",
-      label: "Obesitas",
-      min: 3,
-      minInclusive: false,
-      max: null,
-    },
-  ],
-
-  // IMT/U: Indeks Massa Tubuh menurut Umur (0-60 bulan)
-  imt_u: [
-    {
-      code: "gizi_buruk",
-      label: "Gizi buruk",
-      min: null,
-      max: -3,
-      maxInclusive: false,
-    },
-    {
-      code: "gizi_kurang",
-      label: "Gizi kurang",
-      min: -3,
-      minInclusive: true,
-      max: -2,
-      maxInclusive: false,
-    },
-    {
-      code: "gizi_baik",
-      label: "Gizi baik",
-      min: -2,
-      minInclusive: true,
-      max: 1,
-      maxInclusive: true,
-    },
-    {
-      code: "berisiko_gizi_lebih",
-      label: "Berisiko gizi lebih",
-      min: 1,
-      minInclusive: false,
-      max: 2,
-      maxInclusive: true,
-    },
-    {
-      code: "gizi_lebih",
-      label: "Gizi lebih",
-      min: 2,
-      minInclusive: false,
-      max: 3,
-      maxInclusive: true,
-    },
-    {
-      code: "obesitas",
-      label: "Obesitas",
-      min: 3,
-      minInclusive: false,
-      max: null,
-    },
-  ],
+  bb_tb: gizi("bbtb"),
+  imt_u: gizi("imt"),
 };
 
-// Mesin kategori murni.
+// Catatan kaki Permenkes (hlm. 15) yang perlu ikut tampil pada rekomendasi peringatan (Langkah 3.5).
+export const CATEGORY_NOTES = {
+  bbu_risiko_lebih:
+    "Anak pada kategori ini mungkin memiliki masalah pertumbuhan, perlu dikonfirmasi dengan BB/TB atau IMT/U.",
+  tbu_tinggi:
+    "Anak sangat tinggi biasanya tidak menjadi masalah. Rujuk ke dokter spesialis anak jika diduga ada gangguan endokrin.",
+  imt_gizi_buruk:
+    "Kriteria diagnosis gizi buruk dan gizi kurang menggunakan BB/PB atau BB/TB.",
+  imt_gizi_kurang:
+    "Kriteria diagnosis gizi buruk dan gizi kurang menggunakan BB/PB atau BB/TB.",
+};
+
+// Mesin murni: dipakai juga oleh pengujian dengan pita buatan.
 export function categorizeWith(bands, z) {
   for (const b of bands) {
     const aboveMin =
       b.min === null ||
       b.min === undefined ||
       (b.minInclusive ? z >= b.min : z > b.min);
-
     const belowMax =
       b.max === null ||
       b.max === undefined ||
       (b.maxInclusive ? z <= b.max : z < b.max);
-
-    if (aboveMin && belowMax) {
-      return { code: b.code, label: b.label };
-    }
+    if (aboveMin && belowMax) return { code: b.code, label: b.label };
   }
-
   return null;
 }
 
@@ -206,7 +82,6 @@ export const categorize = (indicator, z) =>
   categorizeWith(CATEGORY_BANDS[indicator] || [], z);
 
 export function labelFor(indicator, code) {
-  const band = (CATEGORY_BANDS[indicator] || []).find((b) => b.code === code);
-
-  return band ? band.label : code;
+  const found = (CATEGORY_BANDS[indicator] || []).find((b) => b.code === code);
+  return found ? found.label : code;
 }
