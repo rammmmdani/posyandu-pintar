@@ -7,7 +7,8 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "seed:demo": "node database/seeds/seed-demo.js",
-    "import:who-bb-u": "node database/seeds/import-who-bb-u.js"
+    "import:who-bb-u": "node database/seeds/import-who-bb-u.js",
+    "import:who-weight-bmi": "node database/seeds/import-who-weight-bmi.js"
   },
   "keywords": [],
   "author": "",
