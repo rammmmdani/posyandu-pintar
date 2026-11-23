@@ -7,6 +7,7 @@ import {
   REFERENCE_VERSION,
   CALCULATION_VERSION,
   COVERAGE_EXTRA_DAYS,
+  STANDING_FROM_DAYS,
 } from "./growth.config.js";
 
 const INDICATORS = {
@@ -49,6 +50,47 @@ async function computeBbU(child, m, ageDays) {
   };
 }
 
+// PB/U (berbaring, di bawah 24 bulan) atau TB/U (berdiri, 24 bulan ke atas).
+// Tabel dipilih dari cara pengukuran yang dicatat. Tidak ada koreksi otomatis antar-cara ukur.
+async function computeLengthHeightForAge(child, m, ageDays) {
+  if (!child.birth_date) return unavailable("Tanggal lahir belum diketahui");
+  if (m.height_cm === null)
+    return unavailable("Panjang/tinggi badan belum diisi");
+  if (!m.measurement_type) return unavailable("Cara pengukuran belum diisi");
+
+  const recumbent = m.measurement_type === "recumbent";
+  if (recumbent && ageDays >= STANDING_FROM_DAYS) {
+    return unavailable(
+      "Diukur berbaring pada usia 24 bulan atau lebih. Ukur ulang dengan posisi berdiri (tinggi badan).",
+    );
+  }
+  if (!recumbent && ageDays < STANDING_FROM_DAYS) {
+    return unavailable(
+      "Diukur berdiri pada usia di bawah 24 bulan. Ukur ulang dengan posisi berbaring (panjang badan).",
+    );
+  }
+
+  const table = recumbent ? "pb_u" : "tb_u";
+  const ref = await repo.findReference(
+    table,
+    child.gender,
+    ageDays,
+    REFERENCE_VERSION,
+  );
+  if (!ref) return unavailable("Referensi untuk usia ini belum tersedia");
+  if (ageDays > ref.max_age + COVERAGE_EXTRA_DAYS)
+    return unavailable("Usia di luar cakupan referensi");
+
+  // Tanpa penyesuaian ekor untuk panjang/tinggi menurut umur (verifikasi pada dokumen teknis WHO).
+  const zscore = roundZ(lmsZScore(m.height_cm, ref, { adjustTails: false }));
+  const category = categorize("tb_u", zscore); // satu set kategori untuk PB/U dan TB/U
+  return {
+    zscore,
+    categoryCode: category ? category.code : null,
+    reason: category ? null : NO_CATEGORY,
+  };
+}
+
 export async function assessMeasurement({ child, measurement }) {
   // Data yang ditandai perlu diperiksa tidak dipakai untuk penilaian.
   if (measurement.validity_status === "perlu_diperiksa")
@@ -59,9 +101,7 @@ export async function assessMeasurement({ child, measurement }) {
     : null;
   const results = {
     bb_u: await computeBbU(child, measurement, ageDays),
-    tb_u: unavailable(
-      child.birth_date ? NOT_YET : "Tanggal lahir belum diketahui",
-    ),
+    tb_u: await computeLengthHeightForAge(child, measurement, ageDays),
     bb_tb: unavailable(
       child.birth_date ? NOT_YET : "Tanggal lahir belum diketahui",
     ),
