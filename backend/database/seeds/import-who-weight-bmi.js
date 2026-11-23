@@ -15,8 +15,8 @@ const SOURCE =
 
 // key 'value'  : kunci = panjang/tinggi (cm) -> kolom measurement_value
 // key 'age'    : kunci = usia (bulan)        -> kolom age_days
-// maxMonthExclusive: untuk IMT/U, tabel 0-2 tahun hanya dipakai sampai bulan 23,
-//                    bulan 24 diambil dari tabel 2-5 tahun (nilainya berbeda).
+// month24AgeDays: usia khusus untuk baris bulan ke-24 dari tabel 0-2 tahun.
+// Tabel 0-2 tahun menggunakan 730 hari, tabel 2-5 tahun menggunakan 731 hari.
 const DATASETS = [
   {
     indicator: "bb_pb",
@@ -61,8 +61,8 @@ const DATASETS = [
     file: "bmi_boys_0-to-2-years_zscores.xlsx",
     keyColumn: "Month",
     key: "age",
-    maxMonthExclusive: 24,
-    expectRows: 24,
+    month24AgeDays: 730,
+    expectRows: 25,
   },
   {
     indicator: "imt_u",
@@ -80,8 +80,8 @@ const DATASETS = [
     file: "bmi_girls_0-to-2-years_zscores.xlsx",
     keyColumn: "Month",
     key: "age",
-    maxMonthExclusive: 24,
-    expectRows: 24,
+    month24AgeDays: 730,
+    expectRows: 25,
   },
   {
     indicator: "imt_u",
@@ -94,7 +94,7 @@ const DATASETS = [
   },
 ];
 
-async function readRows(filePath, keyColumn, maxMonthExclusive) {
+async function readRows(filePath, keyColumn) {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.readFile(filePath);
   const sheet = workbook.worksheets[0];
@@ -158,7 +158,11 @@ async function main() {
       }
       for (const r of rows) {
         const ageDays =
-          d.key === "age" ? Math.round(r.k * DAYS_PER_MONTH) : null;
+          d.key === "age"
+            ? d.month24AgeDays !== undefined && r.k === 24
+              ? d.month24AgeDays
+              : Math.round(r.k * DAYS_PER_MONTH)
+            : null;
         const value = d.key === "value" ? Number(r.k.toFixed(1)) : null;
         await client.query(
           `INSERT INTO who_growth_references
