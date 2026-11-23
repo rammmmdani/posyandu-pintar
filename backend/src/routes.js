@@ -8,6 +8,8 @@ import growthRoutes from "./modules/growth/growth.routes.js";
 import usersRoutes from "./modules/users/users.routes.js";
 import notificationsRoutes from "./modules/notifications/notifications.routes.js";
 import alertsRoutes from "./modules/alerts/alerts.routes.js";
+import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
+import reportsRoutes from "./modules/reports/reports.routes.js";
 
 const router = Router();
 
@@ -26,5 +28,7 @@ router.use("/children", childrenRoutes);
 router.use("/users", usersRoutes);
 router.use("/notifications", notificationsRoutes);
 router.use("/alerts", alertsRoutes);
+router.use("/dashboard", dashboardRoutes);
+router.use("/reports", reportsRoutes);
 
 export default router;
