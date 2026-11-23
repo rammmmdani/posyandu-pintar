@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Menu, LogOut } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Button from "../components/ui/Button";
+import NotificationBell from "./NotificationBell";
 
 export default function Navbar({ onMenuClick }) {
   const { user, logout } = useAuth();
@@ -23,10 +24,16 @@ export default function Navbar({ onMenuClick }) {
       </button>
 
       <div className="ml-auto flex items-center gap-4">
+        {/* Notifikasi */}
+        <NotificationBell />
+
+        {/* Informasi pengguna */}
         <div className="text-right leading-tight">
           <p className="text-sm font-semibold">{user.name}</p>
           <p className="text-xs capitalize text-redam">{user.role}</p>
         </div>
+
+        {/* Tombol keluar */}
         <Button variant="secondary" onClick={handleLogout}>
           <LogOut className="h-4 w-4" aria-hidden="true" />
           Keluar
