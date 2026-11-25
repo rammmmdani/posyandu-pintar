@@ -21,6 +21,10 @@ export function errorHandler(err, req, res, next) {
     return res.status(err.statusCode).json(body);
   }
 
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({ success: false, message: 'Data yang dikirim terlalu besar', code: 'PAYLOAD_TOO_LARGE', errors: [] });
+  }
+
   // JSON rusak dari client
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({

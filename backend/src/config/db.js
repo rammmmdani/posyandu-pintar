@@ -1,4 +1,3 @@
-
 import pg from 'pg';
 import { env } from './env.js';
 
@@ -9,6 +8,10 @@ pg.types.setTypeParser(1082, (v) => v);             // DATE -> 'YYYY-MM-DD'
 
 export const pool = new pg.Pool({
   connectionString: env.databaseUrl,
+  // Untuk database terkelola yang mewajibkan SSL.
+  // Tidak diperlukan pada koneksi internal satu jaringan.
+  ssl: env.databaseSsl ? { rejectUnauthorized: false } : undefined,
+  max: 10,
 });
 
 // Selalu gunakan parameter ($1, $2) agar aman dari SQL injection.

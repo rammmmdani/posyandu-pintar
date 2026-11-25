@@ -2,7 +2,18 @@ import bcrypt from 'bcryptjs';
 import { pool } from '../../src/config/db.js';
 
 // HANYA untuk development dan demo. Data sintetis, bukan data asli.
-const DEMO_PASSWORD = 'Demo12345';
+// HANYA untuk development dan demo. Data sintetis, bukan data asli.
+const DEMO_PASSWORD = process.env.DEMO_PASSWORD || 'Demo12345';
+
+const remote =
+  process.env.NODE_ENV === 'production' ||
+  process.env.DATABASE_SSL === 'true';
+
+if (remote && !process.env.DEMO_PASSWORD) {
+  throw new Error(
+    'Untuk database publik, isi DEMO_PASSWORD dengan kata sandi baru (jangan pakai bawaan).'
+  );
+}
 
 async function main() {
   const hash = await bcrypt.hash(DEMO_PASSWORD, 10);
@@ -29,8 +40,11 @@ async function main() {
     );
   }
 
-  console.log('Seed demo selesai.');
-  console.log('Login: koordinator@demo.test atau kader@demo.test, password:', DEMO_PASSWORD);
+  console.log('Seed demo selesai. Akun: koordinator@demo.test dan kader@demo.test');
+
+  if (!process.env.DEMO_PASSWORD) {
+  console.log('Password pengembangan:', DEMO_PASSWORD);
+  }
 }
 
 main()
