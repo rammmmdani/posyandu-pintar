@@ -31,11 +31,11 @@ export function StatusBadge({ status }) {
 }
 
 // Wajib tampil selama aturan peringatan belum divalidasi tenaga kesehatan (PRD 7.3).
-export function ValidationTag({ validated }) {
+export function ValidationTag({ validated, text = 'contoh, belum divalidasi tenaga kesehatan' }) {
   if (validated) return null;
   return (
     <span className="rounded-md border border-dashed border-amber-600 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-900">
-      contoh, belum divalidasi tenaga kesehatan
+      {text}
     </span>
   );
 }

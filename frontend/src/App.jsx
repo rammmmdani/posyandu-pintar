@@ -14,6 +14,8 @@ import ChildPickerPage from "./features/children/ChildPickerPage";
 
 import MeasurementFormPage from "./features/measurements/MeasurementFormPage";
 
+import MenuRecommendationPage from './features/menus/MenuRecommendationPage';
+
 // Halaman peringatan
 import AlertsPage from "./features/alerts/AlertsPage";
 import AlertDetailPage from "./features/alerts/AlertDetailPage";
@@ -90,8 +92,9 @@ export default function App() {
           {/* Rekomendasi Menu */}
           <Route
             path="menu"
-            element={<PlaceholderPage title="Rekomendasi Menu" />}
+            element={<ChildPickerPage title="Rekomendasi Menu" description="Pilih balita untuk melihat rekomendasi menu sesuai usia, anggaran, dan alergi." to={(c) => `/menu/${c.id}`} actionLabel="Lihat menu" />}
           />
+          <Route path="menu/:id" element={<MenuRecommendationPage />} />
 
           {/* Khusus Koordinator */}
           <Route element={<ProtectedRoute roles={["koordinator"]} />}>
