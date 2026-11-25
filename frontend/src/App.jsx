@@ -18,11 +18,16 @@ import MeasurementFormPage from "./features/measurements/MeasurementFormPage";
 import AlertsPage from "./features/alerts/AlertsPage";
 import AlertDetailPage from "./features/alerts/AlertDetailPage";
 
-// Halaman notifikasi
+// Halaman notifikasi dan laporan
 import NotificationsPage from "./features/notifications/NotificationsPage";
-import ReportsPage from './features/reports/ReportsPage';
+import ReportsPage from "./features/reports/ReportsPage";
+
+// Halaman harga dan pengaturan akun
+import FoodPricesPage from "./features/menus/FoodPricesPage";
+import AccountsPage from "./features/settings/AccountsPage";
 
 // Kader mendarat di Data Balita, koordinator di Dashboard.
+
 function HomeRedirect() {
   const { isKoordinator } = useAuth();
 
@@ -77,7 +82,6 @@ export default function App() {
 
           {/* Peringatan */}
           <Route path="peringatan" element={<AlertsPage />} />
-
           <Route path="peringatan/:id" element={<AlertDetailPage />} />
 
           {/* Notifikasi - dapat diakses semua role */}
@@ -98,10 +102,11 @@ export default function App() {
 
             <Route path="laporan" element={<ReportsPage />} />
 
-            <Route
-              path="pengaturan"
-              element={<PlaceholderPage title="Pengaturan Akun" />}
-            />
+            {/* Harga Pangan */}
+            <Route path="harga" element={<FoodPricesPage />} />
+
+            {/* Pengaturan Akun */}
+            <Route path="pengaturan" element={<AccountsPage />} />
           </Route>
         </Route>
       </Route>
