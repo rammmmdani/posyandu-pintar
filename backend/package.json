@@ -11,7 +11,9 @@
     "import:who-lhfa": "node database/seeds/import-who-lhfa.js",
     "import:who-weight-bmi": "node database/seeds/import-who-weight-bmi.js",
     "seed:demo-data": "node database/seeds/seed-demo-data.js",
-    "seed:food-menu": "node database/seeds/seed-food-menu.js"
+    "seed:food-menu": "node database/seeds/seed-food-menu.js",
+    "test:api": "node --test tests/api.security.test.js",
+    "test:ratelimit": "node --test tests/ratelimit.test.js"
   },
   "keywords": [],
   "author": "",
