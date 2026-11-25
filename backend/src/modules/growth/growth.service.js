@@ -250,8 +250,14 @@ function toAssessmentObject(row) {
   };
 }
 
+
 export async function getAssessmentById(id) {
   const row = await repo.findById(id);
+  return row ? toAssessmentObject(row) : null;
+}
+
+export async function getLatestAssessment(measurementId) {
+  const row = await repo.findLatestByMeasurement(measurementId);
   return row ? toAssessmentObject(row) : null;
 }
 
