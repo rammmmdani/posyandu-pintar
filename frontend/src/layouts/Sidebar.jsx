@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { /* ...yang sudah ada, */ Coins } from "lucide-react";
 
 // Urutan sesuai PRD bagian 11.1
 const NAV_ITEMS = [
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { to: "/peringatan", label: "Peringatan dan Tindak Lanjut", icon: BellRing },
   { to: "/menu", label: "Rekomendasi Menu", icon: UtensilsCrossed },
   { to: "/laporan", label: "Laporan", icon: FileText, roles: ["koordinator"] },
+  { to: "/harga", label: "Harga Bahan", icon: Coins, roles: ["koordinator"] },
   {
     to: "/pengaturan",
     label: "Pengaturan Akun",
