@@ -2,14 +2,15 @@ import { Router } from "express";
 import { query } from "./config/db.js";
 import { sendSuccess } from "./utils/response.js";
 import authRoutes from "./modules/auth/auth.routes.js";
-import foodsRoutes from './modules/foods/foods.routes.js';
-import allergiesRoutes from './modules/allergies/allergies.routes.js';
+import foodsRoutes from "./modules/foods/foods.routes.js";
+import allergiesRoutes from "./modules/allergies/allergies.routes.js";
 import childrenRoutes from "./modules/children/children.routes.js";
 import measurementRoutes from "./modules/measurements/measurements.routes.js";
 import growthRoutes from "./modules/growth/growth.routes.js";
 import usersRoutes from "./modules/users/users.routes.js";
 import notificationsRoutes from "./modules/notifications/notifications.routes.js";
 import alertsRoutes from "./modules/alerts/alerts.routes.js";
+import menusRoutes from "./modules/menus/menus.routes.js";
 
 const router = Router();
 
@@ -25,10 +26,11 @@ router.use("/auth", authRoutes);
 router.use(measurementRoutes);
 router.use(growthRoutes);
 router.use(allergiesRoutes);
-router.use('/food-items', foodsRoutes);
+router.use("/food-items", foodsRoutes);
 router.use("/children", childrenRoutes);
 router.use("/users", usersRoutes);
 router.use("/notifications", notificationsRoutes);
 router.use("/alerts", alertsRoutes);
+router.use("/menus", menusRoutes);
 
 export default router;
