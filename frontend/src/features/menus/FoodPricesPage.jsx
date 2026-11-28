@@ -204,9 +204,9 @@ export default function FoodPricesPage() {
   ];
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Harga Bahan</h1>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-xl font-bold">Harga Bahan</h1>
         <Button
           onClick={() => {
             setFoodErrors({});
@@ -252,7 +252,7 @@ export default function FoodPricesPage() {
           </>
         }
       >
-        <div className="space-y-4">
+        <div className="space-y-3">
           <Input
             label={`Harga (Rp per ${priceFor?.unit ?? ""})`}
             inputMode="numeric"
@@ -283,6 +283,7 @@ export default function FoodPricesPage() {
         open={addOpen}
         onClose={() => setAddOpen(false)}
         title="Tambah bahan"
+        wide
         footer={
           <>
             <Button
@@ -298,7 +299,7 @@ export default function FoodPricesPage() {
           </>
         }
       >
-        <div className="space-y-4">
+        <div className="space-y-3">
           <Input
             label="Nama bahan"
             value={food.name}
@@ -308,7 +309,7 @@ export default function FoodPricesPage() {
             }}
             error={foodErrors.name}
           />
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             <Select
               label="Satuan harga"
               value={food.unit}

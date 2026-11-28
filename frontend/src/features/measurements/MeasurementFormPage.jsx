@@ -117,13 +117,13 @@ export default function MeasurementFormPage() {
   const blocked = child.consent_status === 'ditarik';
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-3xl">
       <Link to={`/balita/${id}`} className="text-sm text-daun-700 hover:underline">
         Kembali ke detail balita
       </Link>
-      <h1 className="mt-2 text-2xl font-bold">Catat pengukuran</h1>
+      <h1 className="mt-2 text-xl font-bold">Catat pengukuran</h1>
 
-      <Card className="mt-4">
+      <Card className="mt-3">
         <p className="text-sm text-redam">Pengukuran untuk</p>
         <p className="text-lg font-semibold">{child.name}</p>
         <p className="text-sm text-redam">
@@ -132,25 +132,25 @@ export default function MeasurementFormPage() {
       </Card>
 
       {blocked && (
-        <Alert tone="warning" title="Persetujuan wali ditarik" className="mt-4">
+        <Alert tone="warning" title="Persetujuan wali ditarik" className="mt-3">
           Pengukuran baru tidak dapat dicatat sampai persetujuan dicatat kembali.
         </Alert>
       )}
       {!child.birth_date && (
-        <Alert tone="warning" title="Tanggal lahir belum diketahui" className="mt-4">
+        <Alert tone="warning" title="Tanggal lahir belum diketahui" className="mt-3">
           Pengukuran tetap bisa disimpan, tetapi hasil penilaian tidak dapat dihitung.
         </Alert>
       )}
       {!online && (
-        <Alert tone="warning" className="mt-4">
+        <Alert tone="warning" className="mt-3">
           Tidak ada koneksi internet. Pengukuran baru tidak dapat disimpan.
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit} noValidate className="mt-4 space-y-5">
+      <form onSubmit={handleSubmit} noValidate className="mt-4 space-y-4">
         {formError && <Alert tone="error">{formError}</Alert>}
 
-        <Card className="space-y-4">
+        <Card className="space-y-3">
           <Input
             label="Tanggal pengukuran"
             name="measurement_date"
@@ -160,7 +160,7 @@ export default function MeasurementFormPage() {
             onChange={onChange}
             error={errors.measurement_date}
           />
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             <Input
               label="Berat badan (kg)"
               name="weight_kg"

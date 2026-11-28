@@ -60,6 +60,8 @@ CREATE TABLE children (
     parent_name  TEXT        NOT NULL,
     parent_phone TEXT,
     address      TEXT,
+    rt           VARCHAR(3),
+    rw           VARCHAR(3),
     status       TEXT        NOT NULL DEFAULT 'aktif' CHECK (status IN ('aktif', 'nonaktif')),
     created_by   BIGINT      NOT NULL REFERENCES users(id),
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -69,13 +71,16 @@ CREATE TABLE children (
 );
 CREATE INDEX children_posyandu_idx ON children (posyandu_id) WHERE deleted_at IS NULL;
 CREATE INDEX children_name_idx     ON children (lower(name));
+CREATE INDEX children_rt_idx       ON children (rt) WHERE deleted_at IS NULL;
+CREATE INDEX children_rw_idx       ON children (rw) WHERE deleted_at IS NULL;
+CREATE INDEX children_rt_rw_idx    ON children (rt, rw) WHERE deleted_at IS NULL;
 
 CREATE TABLE guardian_consents (
     id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     child_id       BIGINT      NOT NULL REFERENCES children(id),
     guardian_name  TEXT        NOT NULL,
     consent_status TEXT        NOT NULL CHECK (consent_status IN ('diberikan', 'ditarik')),
-    method         TEXT        NOT NULL CHECK (method IN ('lisan', 'tertulis')),
+    method         TEXT        NOT NULL DEFAULT 'checklist' CHECK (method IN ('lisan', 'tertulis', 'checklist')),
     notice_version TEXT        NOT NULL,
     consented_at   TIMESTAMPTZ,
     withdrawn_at   TIMESTAMPTZ,

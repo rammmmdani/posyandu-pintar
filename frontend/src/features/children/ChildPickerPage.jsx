@@ -46,7 +46,7 @@ export default function ChildPickerPage({ title, description, to, actionLabel })
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">{title}</h1>
+      <h1 className="text-xl font-bold">{title}</h1>
       <p className="mt-1 text-sm text-redam">{description}</p>
 
       <form
@@ -56,16 +56,16 @@ export default function ChildPickerPage({ title, description, to, actionLabel })
           setPage(1);
           setQ(search.trim());
         }}
-        className="mt-5 flex flex-wrap items-end gap-3"
+        className="mt-4 flex flex-wrap items-end gap-2"
       >
-        <Input label="Cari nama anak atau wali" type="search" value={search} onChange={(e) => setSearch(e.target.value)} className="w-full sm:w-72" />
+        <Input label="Cari nama anak atau wali" type="search" value={search} onChange={(e) => setSearch(e.target.value)} className="w-full sm:w-64" />
         <Button type="submit" variant="secondary">
           <Search className="h-4 w-4" aria-hidden="true" />
           Cari
         </Button>
       </form>
 
-      <div className="mt-5">
+      <div className="mt-4">
         {state.error ? (
           <Alert tone="error">{state.error}</Alert>
         ) : (

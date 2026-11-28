@@ -14,7 +14,7 @@ export default function Alert({
   return (
     <div
       role={tone === "error" ? "alert" : "status"}
-      className={`rounded-lg border px-4 py-3 text-sm ${tones[tone]} ${className}`}
+      className={`rounded-lg border px-3 py-2 text-sm ${tones[tone]} ${className}`}
     >
       {title && <p className="font-semibold">{title}</p>}
       {children && <div>{children}</div>}

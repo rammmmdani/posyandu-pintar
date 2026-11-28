@@ -16,13 +16,12 @@ import { useToast } from '../../components/ui/Toast';
 
 const EMPTY = {
   name: '', birth_date: '', birth_date_unknown: false, gender: '',
-  parent_name: '', parent_phone: '', address: '',
-  consent_method: 'lisan', consent_agreed: false,
+  parent_name: '', parent_phone: '', address: '', rt: '', rw: '',
+  consent_agreed: false,
 };
 
 // Nama field dari server -> nama field di form.
 const SERVER_FIELD_MAP = {
-  'consent.method': 'consent_method',
   'consent.guardian_name': 'parent_name',
   'consent.notice_version': 'consent_agreed',
   consent: 'consent_agreed',
@@ -37,8 +36,13 @@ function validate(form, isEdit) {
     if (!form.birth_date) e.birth_date = 'Isi tanggal lahir, atau centang "Tanggal lahir belum diketahui"';
     else if (form.birth_date > todayISO()) e.birth_date = 'Tanggal lahir tidak boleh di masa depan';
   }
+  for (const key of ['rt', 'rw']) {
+    if (form[key] && !/^\d{3}$/.test(form[key])) {
+      e[key] = `${key.toUpperCase()} harus terdiri dari 3 digit angka`;
+    }
+  }
   if (!isEdit && !form.consent_agreed) {
-    e.consent_agreed = 'Persetujuan wali wajib dicatat sebelum data disimpan';
+    e.consent_agreed = 'Centang persetujuan wali sebelum menyimpan';
   }
   return e;
 }
@@ -51,6 +55,8 @@ function buildPayload(form, isEdit, confirmDuplicate) {
     parent_name: form.parent_name.trim(),
     parent_phone: form.parent_phone.trim() || null,
     address: form.address.trim() || null,
+    rt: form.rt || null,
+    rw: form.rw || null,
   };
   if (isEdit) return base;
   return {
@@ -58,7 +64,6 @@ function buildPayload(form, isEdit, confirmDuplicate) {
     confirm_duplicate: confirmDuplicate,
     consent: {
       guardian_name: base.parent_name,
-      method: form.consent_method,
       notice_version: PRIVACY_NOTICE.version,
     },
   };
@@ -91,6 +96,8 @@ export default function ChildFormPage() {
           parent_name: c.parent_name,
           parent_phone: c.parent_phone || '',
           address: c.address || '',
+          rt: c.rt || '',
+          rw: c.rw || '',
         });
       })
       .catch((err) => setFormError(getErrorMessage(err)))
@@ -101,7 +108,14 @@ export default function ChildFormPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
-  const onChange = (e) => set(e.target.name, e.target.value);
+  const onChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'rt' || name === 'rw') {
+      set(name, value.replace(/\D/g, '').slice(0, 3));
+      return;
+    }
+    set(name, value);
+  };
 
   const submit = async (confirmDuplicate = false) => {
     setFormError('');
@@ -148,16 +162,16 @@ export default function ChildFormPage() {
   if (loading) return <Spinner />;
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-3xl">
       <Link to={isEdit ? `/balita/${id}` : '/balita'} className="text-sm text-daun-700 hover:underline">
         Kembali
       </Link>
-      <h1 className="mt-2 text-2xl font-bold">{isEdit ? 'Ubah data balita' : 'Tambah balita'}</h1>
+      <h1 className="mt-2 text-xl font-bold">{isEdit ? 'Ubah data balita' : 'Tambah balita'}</h1>
 
-      <form onSubmit={handleSubmit} noValidate className="mt-5 space-y-5">
+      <form onSubmit={handleSubmit} noValidate className="mt-4 space-y-4">
         {formError && <Alert tone="error">{formError}</Alert>}
 
-        <Card className="space-y-4">
+        <Card className="space-y-3">
           <h2 className="font-semibold">Data anak</h2>
           <Input label="Nama anak" name="name" value={form.name} onChange={onChange} error={errors.name} />
           <Select label="Jenis kelamin" name="gender" value={form.gender} onChange={onChange} error={errors.gender}>
@@ -193,15 +207,41 @@ export default function ChildFormPage() {
           </div>
         </Card>
 
-        <Card className="space-y-4">
+        <Card className="space-y-3">
           <h2 className="font-semibold">Data wali</h2>
           <Input label="Nama wali" name="parent_name" value={form.parent_name} onChange={onChange} error={errors.parent_name} />
           <Input label="Nomor telepon (opsional)" name="parent_phone" type="tel" value={form.parent_phone} onChange={onChange} />
           <Input label="Alamat (opsional)" name="address" value={form.address} onChange={onChange} />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input
+              label="RT (opsional)"
+              name="rt"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="001"
+              maxLength={3}
+              pattern="[0-9]{3}"
+              value={form.rt}
+              onChange={onChange}
+              error={errors.rt}
+            />
+            <Input
+              label="RW (opsional)"
+              name="rw"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="002"
+              maxLength={3}
+              pattern="[0-9]{3}"
+              value={form.rw}
+              onChange={onChange}
+              error={errors.rw}
+            />
+          </div>
         </Card>
 
         {!isEdit && (
-          <Card className="space-y-4">
+          <Card className="space-y-3">
             <h2 className="font-semibold">Persetujuan wali</h2>
             <div className="rounded-lg bg-kertas p-4 text-sm">
               <p className="font-semibold">{PRIVACY_NOTICE.title}</p>
@@ -212,12 +252,8 @@ export default function ChildFormPage() {
               </ul>
               <p className="mt-3 text-xs text-redam">Versi {PRIVACY_NOTICE.version}. Teks draf, belum ditinjau.</p>
             </div>
-            <Select label="Cara persetujuan diberikan" name="consent_method" value={form.consent_method} onChange={onChange}>
-              <option value="lisan">Lisan</option>
-              <option value="tertulis">Tertulis</option>
-            </Select>
             <Checkbox
-              label="Pemberitahuan di atas sudah dijelaskan kepada wali dan wali menyatakan setuju."
+              label="Wali telah membaca pemberitahuan di atas dan menyetujuinya."
               checked={form.consent_agreed}
               onChange={(e) => set('consent_agreed', e.target.checked)}
               error={errors.consent_agreed}
@@ -225,7 +261,7 @@ export default function ChildFormPage() {
           </Card>
         )}
 
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <Button type="submit" loading={submitting}>
             {isEdit ? 'Simpan perubahan' : 'Daftarkan balita'}
           </Button>
@@ -236,6 +272,7 @@ export default function ChildFormPage() {
       </form>
 
       <Modal
+        wide
         open={duplicates.length > 0}
         onClose={() => setDuplicates([])}
         title="Kemungkinan balita sudah terdaftar"

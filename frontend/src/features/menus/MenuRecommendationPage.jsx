@@ -37,13 +37,13 @@ function Guidance({ g }) {
 function MenuCard({ r }) {
   return (
     <Card>
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="text-lg font-semibold">{r.menu.name}</h3>
           <p className="mt-1 text-sm text-redam">{r.menu.serving_info}</p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-bold text-daun-700">{rupiah(r.estimated_cost)}</p>
+          <p className="text-xl font-bold text-daun-700">{rupiah(r.estimated_cost)}</p>
           <p className="text-xs text-redam">per porsi{!r.cost_complete && ', belum lengkap'}</p>
         </div>
       </div>
@@ -123,10 +123,10 @@ export default function MenuRecommendationPage() {
   const d = state.data;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <Link to="/menu" className="text-sm text-daun-700 hover:underline">Kembali ke pilih balita</Link>
-      <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-bold">Rekomendasi menu: {d.child.name}</h1>
+      <div className="flex flex-wrap items-center gap-2">
+        <h1 className="text-xl font-bold">Rekomendasi menu: {d.child.name}</h1>
         <ValidationTag validated={d.is_validated} text="contoh, belum divalidasi ahli gizi" />
       </div>
       <p className="text-sm text-redam">Usia {formatAge(d.child.age_months)}. {d.notes[0]}</p>
@@ -137,7 +137,7 @@ export default function MenuRecommendationPage() {
 
       {d.age_group && (
         <>
-          <form onSubmit={applyBudget} className="flex flex-wrap items-end gap-3">
+          <form onSubmit={applyBudget} className="flex flex-wrap items-end gap-2">
             <Input
               label="Anggaran per porsi (Rp, opsional)"
               inputMode="numeric"
@@ -145,13 +145,13 @@ export default function MenuRecommendationPage() {
               value={budgetInput}
               onChange={(e) => setBudgetInput(e.target.value)}
               error={budgetError}
-              className="w-full sm:w-64"
+              className="w-full sm:w-56"
             />
             <Button type="submit" variant="secondary">Terapkan</Button>
             {budget !== null && <Button variant="ghost" onClick={() => { setBudgetInput(''); setBudget(null); }}>Hapus anggaran</Button>}
           </form>
 
-          <section className="space-y-4">
+          <section className="space-y-3">
             <h2 className="font-semibold">Menu yang direkomendasikan ({d.recommendations.length})</h2>
             {d.recommendations.length === 0 ? (
               <Alert tone="warning">Tidak ada menu yang sesuai. Coba naikkan anggaran atau periksa daftar alergi dan pantangan.</Alert>

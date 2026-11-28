@@ -6,6 +6,7 @@ import AppLayout from "./layouts/AppLayout";
 
 import LoginPage from "./features/auth/LoginPage";
 import PlaceholderPage from "./components/PlaceholderPage";
+import DashboardPage from "./features/dashboard/DashboardPage";
 
 import ChildrenPage from "./features/children/ChildrenPage";
 import ChildFormPage from "./features/children/ChildFormPage";
@@ -98,10 +99,7 @@ export default function App() {
 
           {/* Khusus Koordinator */}
           <Route element={<ProtectedRoute roles={["koordinator"]} />}>
-            <Route
-              path="dashboard"
-              element={<PlaceholderPage title="Dashboard" />}
-            />
+            <Route path="dashboard" element={<DashboardPage />} />
 
             <Route path="laporan" element={<ReportsPage />} />
 

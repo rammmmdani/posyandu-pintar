@@ -23,14 +23,33 @@ async function getOrFail(user, id) {
   return child;
 }
 
-export async function listChildren(user, { page, limit, q, status }) {
+export async function listChildren(user, { page, limit, q, status, single, rt, rw }) {
+  if (status === 'terhapus' && user.role !== 'koordinator') {
+    throw new ApiError(403, 'FORBIDDEN', 'Anda tidak memiliki akses ke data balita yang dihapus');
+  }
+  const term = q || null;
+  const oneResult = Boolean(single && term);
+  const effectiveLimit = oneResult ? 1 : limit;
+  const effectivePage = oneResult ? 1 : page;
   const { rows, total } = await repo.list(user.posyandu_id, {
-    q: q || null,
-    status,
-    limit,
-    offset: (page - 1) * limit,
+    q: term,
+    status: status === 'semua' ? null : status,
+    limit: effectiveLimit,
+    offset: oneResult ? 0 : (page - 1) * limit,
+    single: oneResult,
+    rt: rt || null,
+    rw: rw || null,
   });
-  return { rows, meta: { page, limit, total, total_pages: Math.ceil(total / limit) } };
+  const finalTotal = oneResult ? rows.length : total;
+  return {
+    rows,
+    meta: {
+      page: effectivePage,
+      limit: effectiveLimit,
+      total: finalTotal,
+      total_pages: oneResult ? (finalTotal ? 1 : 0) : Math.ceil(total / limit),
+    },
+  };
 }
 
 export async function getChild(user, id) {
@@ -82,7 +101,7 @@ export async function updateChild(user, id, input, ip) {
   if (input.birth_date !== undefined) assertBirthDate(input.birth_date);
 
   const patch = { ...input };
-  for (const key of ['parent_phone', 'address']) {
+  for (const key of ['parent_phone', 'address', 'rt', 'rw']) {
     if (patch[key] === '') patch[key] = null;
   }
 
@@ -122,6 +141,38 @@ export async function setChildStatus(user, id, status, ip) {
     entityId: id,
     oldData: { status: before.status },
     newData: { status },
+    ip,
+  });
+  return repo.findById(user.posyandu_id, id);
+}
+
+export async function deleteChild(user, id, ip) {
+  const before = await getOrFail(user, id);
+  await repo.softDelete(user.posyandu_id, id);
+  await logAudit({
+    userId: user.id,
+    action: 'delete',
+    entityType: 'child',
+    entityId: id,
+    oldData: { status: before.status },
+    newData: { deleted: true },
+    ip,
+  });
+  return null;
+}
+
+export async function restoreChild(user, id, ip) {
+  const before = await repo.findDeletedById(user.posyandu_id, id);
+  if (!before) throw new ApiError(404, 'NOT_FOUND', 'Data balita tidak ditemukan');
+
+  await repo.restore(user.posyandu_id, id);
+  await logAudit({
+    userId: user.id,
+    action: 'restore',
+    entityType: 'child',
+    entityId: id,
+    oldData: { deleted: true },
+    newData: { status: before.status },
     ip,
   });
   return repo.findById(user.posyandu_id, id);

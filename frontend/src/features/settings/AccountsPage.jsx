@@ -183,9 +183,9 @@ export default function AccountsPage() {
   ];
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Pengaturan Akun</h1>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-xl font-bold">Pengaturan Akun</h1>
         <Button
           onClick={() => {
             setErrors({});
@@ -218,6 +218,7 @@ export default function AccountsPage() {
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         title="Tambah akun"
+        wide
         footer={
           <>
             <Button
@@ -233,7 +234,7 @@ export default function AccountsPage() {
           </>
         }
       >
-        <div className="space-y-4">
+        <div className="space-y-3">
           <Input
             label="Nama"
             value={form.name}

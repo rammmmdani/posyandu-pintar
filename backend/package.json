@@ -6,6 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "db:migrate": "node database/migrate.js",
     "seed:demo": "node database/seeds/seed-demo.js",
     "import:who-bb-u": "node database/seeds/import-who-bb-u.js",
     "import:who-lhfa": "node database/seeds/import-who-lhfa.js",

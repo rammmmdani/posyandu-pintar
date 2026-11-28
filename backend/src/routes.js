@@ -11,6 +11,7 @@ import usersRoutes from "./modules/users/users.routes.js";
 import notificationsRoutes from "./modules/notifications/notifications.routes.js";
 import alertsRoutes from "./modules/alerts/alerts.routes.js";
 import menusRoutes from "./modules/menus/menus.routes.js";
+import reportsRoutes from "./modules/reports/reports.routes.js";
 
 const router = Router();
 
@@ -32,5 +33,6 @@ router.use("/users", usersRoutes);
 router.use("/notifications", notificationsRoutes);
 router.use("/alerts", alertsRoutes);
 router.use("/menus", menusRoutes);
+router.use("/reports", reportsRoutes);
 
 export default router;

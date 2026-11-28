@@ -54,23 +54,23 @@ export default function AlertsPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-bold">Peringatan dan Tindak Lanjut</h1>
+      <div className="flex flex-wrap items-center gap-2">
+        <h1 className="text-xl font-bold">Peringatan dan Tindak Lanjut</h1>
         <ValidationTag validated={false} />
       </div>
       <p className="mt-1 text-sm text-redam">
         Peringatan adalah penanda yang perlu diperhatikan, bukan diagnosis. Keputusan tetap pada tenaga kesehatan.
       </p>
 
-      <div className="mt-5 flex flex-wrap gap-3">
-        <Select label="Status" value={status} onChange={(e) => update({ status: e.target.value })} className="w-full sm:w-48">
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Select label="Status" value={status} onChange={(e) => update({ status: e.target.value })} className="w-full sm:w-40">
           <option value="">Semua</option>
           <option value="baru">Baru</option>
           <option value="dilihat">Dilihat</option>
           <option value="ditindaklanjuti">Ditindaklanjuti</option>
           <option value="ditutup">Ditutup</option>
         </Select>
-        <Select label="Tingkat" value={severity} onChange={(e) => update({ severity: e.target.value })} className="w-full sm:w-56">
+        <Select label="Tingkat" value={severity} onChange={(e) => update({ severity: e.target.value })} className="w-full sm:w-48">
           <option value="">Semua</option>
           <option value="perlu_perhatian">Perlu perhatian</option>
           <option value="perlu_pemeriksaan">Perlu pemeriksaan</option>
@@ -78,7 +78,7 @@ export default function AlertsPage() {
         </Select>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-4">
         {state.error ? (
           <Alert tone="error">{state.error}</Alert>
         ) : (

@@ -284,6 +284,12 @@ export async function getGrowth(child) {
       bb_tb: r.category_bb_tb ? labelFor("bb_tb", r.category_bb_tb) : null,
       imt_u: r.category_imt_u ? labelFor("imt_u", r.category_imt_u) : null,
     },
+    category_codes: {
+      bb_u: r.category_bb_u ?? null,
+      tb_u: r.category_tb_u ?? null,
+      bb_tb: r.category_bb_tb ?? null,
+      imt_u: r.category_imt_u ?? null,
+    },
   }));
   return {
     child: {

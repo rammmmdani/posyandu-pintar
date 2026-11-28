@@ -15,7 +15,7 @@ export default function Select({
       {label && (
         <label
           htmlFor={selectId}
-          className="mb-1.5 block text-sm font-medium text-tinta"
+          className="mb-1 block text-sm font-medium text-tinta"
         >
           {label}
         </label>
@@ -24,7 +24,7 @@ export default function Select({
         id={selectId}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${selectId}-error` : undefined}
-        className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-tinta ${
+        className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-tinta sm:py-2 ${
           error ? "border-red-600" : "border-garis"
         }`}
         {...props}
@@ -32,7 +32,7 @@ export default function Select({
         {children}
       </select>
       {error && (
-        <p id={`${selectId}-error`} className="mt-1 text-sm text-red-700">
+        <p id={`${selectId}-error`} className="mt-1 text-xs text-red-700 sm:text-sm">
           {error}
         </p>
       )}

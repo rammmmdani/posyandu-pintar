@@ -32,7 +32,7 @@ export default function NotificationBell() {
       aria-label={
         unread > 0 ? `Notifikasi, ${unread} belum dibaca` : "Notifikasi"
       }
-      className="relative rounded-lg p-2 hover:bg-kertas"
+      className="relative rounded-lg p-2.5 hover:bg-kertas sm:p-2"
     >
       <Bell className="h-5 w-5" aria-hidden="true" />
       {unread > 0 && (

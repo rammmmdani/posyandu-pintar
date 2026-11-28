@@ -64,7 +64,7 @@ export default function AllergyEditor({ childId, onSaved }) {
         {items.map((i) => (
           <li key={keyOf(i)} className="flex items-center gap-2 rounded-full border border-garis bg-kertas px-3 py-1 text-sm">
             <span>{i.allergen_tag ? `Kategori: ${ALLERGEN_LABEL[i.allergen_tag]}` : `Bahan: ${i.food_name}`}</span>
-            <button type="button" aria-label="Hapus" className="font-bold text-redam hover:text-tinta" onClick={() => setItems(items.filter((x) => keyOf(x) !== keyOf(i)))}>
+            <button type="button" aria-label="Hapus" className="p-2 font-bold text-redam hover:text-tinta sm:p-1.5" onClick={() => setItems(items.filter((x) => keyOf(x) !== keyOf(i)))}>
               ×
             </button>
           </li>
@@ -99,7 +99,7 @@ export default function AllergyEditor({ childId, onSaved }) {
       </div>
 
       {!online && <Alert tone="warning" className="mt-3">Tidak ada koneksi internet. Perubahan tidak dapat disimpan.</Alert>}
-      <Button className="mt-4" loading={saving} disabled={!online} onClick={save}>Simpan alergi dan pantangan</Button>
+      <Button className="mt-3" loading={saving} disabled={!online} onClick={save}>Simpan alergi dan pantangan</Button>
     </Card>
   );
 }

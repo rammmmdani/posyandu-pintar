@@ -1,12 +1,20 @@
 import { formatAge, formatDate } from "../../utils/format";
 import Badge from "../../components/ui/Badge";
 import Table from "../../components/ui/Table";
+import { toneForCategory } from "./growthStatus";
 
 const VALIDITY = {
   valid: { tone: "sukses", label: "Valid" },
   perlu_diperiksa: { tone: "perhatian", label: "Perlu diperiksa" },
   tidak_lengkap: { tone: "netral", label: "Belum lengkap" },
 };
+
+const WHO_INDICATORS = [
+  { key: "bb_u", label: "BB/U" },
+  { key: "tb_u", label: "TB/U" },
+  { key: "bb_tb", label: "BB/TB" },
+  { key: "imt_u", label: "IMT/U" },
+];
 
 const num = (v, unit) =>
   v === null || v === undefined
@@ -35,6 +43,27 @@ export default function GrowthTable({ points }) {
         p.zscores?.bb_u === null || p.zscores?.bb_u === undefined
           ? "-"
           : String(p.zscores.bb_u).replace(".", ","),
+    },
+    {
+      key: "who",
+      header: "Status WHO",
+      render: (p) => {
+        const badges = WHO_INDICATORS.map((indicator) => {
+          const code = p.category_codes?.[indicator.key];
+          const label = p.categories?.[indicator.key];
+          if (!code && !label) return null;
+          return (
+            <Badge key={indicator.key} tone={toneForCategory(code, label)}>
+              {indicator.label}: {label}
+            </Badge>
+          );
+        }).filter(Boolean);
+        return badges.length ? (
+          <div className="flex flex-wrap gap-1">{badges}</div>
+        ) : (
+          <span className="text-redam">-</span>
+        );
+      },
     },
     {
       key: "status",

@@ -11,18 +11,21 @@ import {
 } from "recharts";
 import { formatDate } from "../../utils/format";
 import Card from "../../components/ui/Card";
+import { dotColorFor, toneForCategory } from "./growthStatus";
 
 const METRICS = [
   {
     key: "weight_kg",
     label: "Berat badan",
     unit: "kg",
+    categoryKey: "bb_u",
     get: (p) => p.weight_kg,
   },
   {
     key: "height_cm",
     label: "Panjang/tinggi badan",
     unit: "cm",
+    categoryKey: "tb_u",
     get: (p) => p.height_cm,
   },
   {
@@ -30,6 +33,7 @@ const METRICS = [
     label: "z-score BB/U",
     unit: "SD",
     z: true,
+    categoryKey: "bb_u",
     get: (p) => p.zscores?.bb_u ?? null,
   },
   {
@@ -37,6 +41,7 @@ const METRICS = [
     label: "z-score PB/U atau TB/U",
     unit: "SD",
     z: true,
+    categoryKey: "tb_u",
     get: (p) => p.zscores?.tb_u ?? null,
   },
   {
@@ -44,6 +49,7 @@ const METRICS = [
     label: "z-score BB/PB atau BB/TB",
     unit: "SD",
     z: true,
+    categoryKey: "bb_tb",
     get: (p) => p.zscores?.bb_tb ?? null,
   },
   {
@@ -51,12 +57,13 @@ const METRICS = [
     label: "z-score IMT/U",
     unit: "SD",
     z: true,
+    categoryKey: "imt_u",
     get: (p) => p.zscores?.imt_u ?? null,
   },
 ];
 
 // Lingkaran = data valid, persegi = perlu diperiksa. Bentuk berbeda, bukan hanya warna.
-function Dot({ cx, cy, payload }) {
+function Dot({ cx, cy, payload, metric }) {
   if (cx == null || cy == null) return null;
   const key = `dot-${payload.measurement_id}`;
   if (payload.validity_status === "perlu_diperiksa") {
@@ -73,7 +80,17 @@ function Dot({ cx, cy, payload }) {
       />
     );
   }
-  return <circle key={key} cx={cx} cy={cy} r={4} fill="#1f7a5c" />;
+  const code = payload.category_codes?.[metric.categoryKey];
+  const label = payload.categories?.[metric.categoryKey];
+  return (
+    <circle
+      key={key}
+      cx={cx}
+      cy={cy}
+      r={4}
+      fill={dotColorFor(toneForCategory(code, label))}
+    />
+  );
 }
 
 function ChartTooltip({ active, payload, metric }) {
@@ -84,6 +101,11 @@ function ChartTooltip({ active, payload, metric }) {
       <p className="font-semibold">{formatDate(p.measurement_date)}</p>
       {p.age_months !== null && (
         <p className="text-redam">Usia {p.age_months} bulan</p>
+      )}
+      {p.categories?.[metric.categoryKey] && (
+        <p className="text-redam">
+          Status WHO: <b>{p.categories[metric.categoryKey]}</b>
+        </p>
       )}
       <p>
         {metric.label}: <b>{String(p.value).replace(".", ",")}</b> {metric.unit}
@@ -155,12 +177,12 @@ export default function GrowthChart({ points }) {
       </div>
 
       {filled.length < 2 ? (
-        <p className="mt-4 rounded-lg bg-kertas p-4 text-sm text-redam">
+        <p className="mt-3 rounded-lg bg-kertas p-3 text-sm text-redam">
           Grafik tampil setelah ada minimal dua pengukuran. Riwayat lengkap ada
           pada tabel di bawah.
         </p>
       ) : (
-        <div role="img" aria-label={summary} className="mt-4 h-72 w-full">
+        <div role="img" aria-label={summary} className="mt-3 h-56 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={data}
@@ -222,7 +244,7 @@ export default function GrowthChart({ points }) {
                 stroke="#1f7a5c"
                 strokeWidth={2.5}
                 connectNulls={false}
-                dot={<Dot />}
+                dot={<Dot metric={metric} />}
                 activeDot={{ r: 6 }}
                 isAnimationActive={false}
               />
@@ -232,7 +254,7 @@ export default function GrowthChart({ points }) {
       )}
 
       <p className="mt-3 text-xs text-redam">
-        Lingkaran: data valid. Persegi: data perlu diperiksa.
+        Lingkaran: data valid. Persegi: data perlu diperiksa. Warna lingkaran mengikuti status WHO: hijau normal, kuning perlu perhatian, oranye perlu pemeriksaan, merah perlu tindak lanjut.
         {metric.z &&
           " Garis putus-putus pada 0, ±2, dan ±3 SD adalah garis bantu baca, bukan diagnosis."}
       </p>

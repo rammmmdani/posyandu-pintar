@@ -119,13 +119,13 @@ export default function ReportsPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Laporan</h1>
+    <div className="space-y-4">
+      <h1 className="text-xl font-bold">Laporan</h1>
 
       <Card>
         <h2 className="font-semibold">Buat laporan</h2>
-        <form onSubmit={submit} noValidate className="mt-4 space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+        <form onSubmit={submit} noValidate className="mt-4 space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <Select label="Jenis laporan" value={form.report_type} onChange={(e) => { setForm({ ...form, report_type: e.target.value }); setErrors({}); }}>
               <option value="bulanan">Bulanan</option>
               <option value="rekap_6_bulan">Rekap 6 bulan</option>
@@ -141,7 +141,7 @@ export default function ReportsPage() {
                 hint={form.report_type === 'rekap_6_bulan' ? 'Rekap mencakup 6 bulan yang berakhir pada bulan ini.' : undefined}
               />
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 sm:col-span-1">
+              <div className="grid gap-3 sm:grid-cols-2 sm:col-span-1">
                 <Input label="Dari" type="date" value={form.period_start} onChange={(e) => setForm({ ...form, period_start: e.target.value })} error={errors.period_start} />
                 <Input label="Sampai" type="date" value={form.period_end} onChange={(e) => setForm({ ...form, period_end: e.target.value })} error={errors.period_end} />
               </div>
@@ -150,13 +150,13 @@ export default function ReportsPage() {
           {!online && <Alert tone="warning">Tidak ada koneksi internet. Laporan tidak dapat dibuat.</Alert>}
           <Button type="submit" loading={creating} disabled={!online}>{creating ? 'Membuat laporan...' : 'Buat laporan'}</Button>
         </form>
-        <p className="mt-4 text-xs text-redam">
+        <p className="mt-3 text-xs text-redam">
           Laporan memuat data kesehatan anak. Periksa isinya sebelum dibagikan, dan bagikan hanya melalui kanal yang aman kepada pihak yang berwenang.
         </p>
       </Card>
 
       <section>
-        <h2 className="mb-3 font-semibold">Riwayat laporan</h2>
+        <h2 className="mb-2 font-semibold">Riwayat laporan</h2>
         {state.error ? (
           <Alert tone="error">{state.error}</Alert>
         ) : (

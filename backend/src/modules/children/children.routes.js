@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authenticate } from '../../middlewares/auth.js';
+import { requireRole } from '../../middlewares/role.js';
 import { validate } from '../../middlewares/validate.js';
 import {
   createChildSchema, updateChildSchema, statusSchema, consentSchema, listQuerySchema,
@@ -15,6 +16,8 @@ router.post('/', validate(createChildSchema), controller.create);
 router.get('/:id', controller.detail);
 router.patch('/:id', validate(updateChildSchema), controller.update);
 router.patch('/:id/status', validate(statusSchema), controller.setStatus);
+router.delete('/:id', requireRole('koordinator'), controller.remove);
+router.patch('/:id/restore', requireRole('koordinator'), controller.restore);
 router.get('/:id/consents', controller.listConsents);
 router.post('/:id/consents', validate(consentSchema), controller.addConsent);
 

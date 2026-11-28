@@ -7,7 +7,7 @@ export default function Pagination({ meta, onPageChange }) {
   return (
     <nav
       aria-label="Halaman data"
-      className="flex flex-wrap items-center justify-between gap-3 pt-4 text-sm"
+      className="flex flex-wrap items-center justify-between gap-2 pt-3 text-sm"
     >
       <p className="text-redam">
         Halaman {page} dari {total_pages} ({total} data)

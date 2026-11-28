@@ -102,12 +102,12 @@ export default function AlertDetailPage() {
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <Link to="/peringatan" className="text-sm text-daun-700 hover:underline">Kembali ke daftar peringatan</Link>
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-xl font-bold">
             <Link to={`/balita/${alert.child.id}`} className="hover:underline">{alert.child.name}</Link>
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -144,15 +144,15 @@ export default function AlertDetailPage() {
       {alert.assessment && <AssessmentSummary assessment={alert.assessment} />}
 
       <section>
-        <h2 className="mb-3 font-semibold">Riwayat tindak lanjut</h2>
+        <h2 className="mb-2 font-semibold">Riwayat tindak lanjut</h2>
         <Table columns={followColumns} rows={alert.follow_ups} emptyTitle="Belum ada tindak lanjut" />
       </section>
 
       {!closed && (
         <Card>
           <h2 className="font-semibold">Catat tindak lanjut</h2>
-          <form onSubmit={submitFollowUp} noValidate className="mt-3 space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+          <form onSubmit={submitFollowUp} noValidate className="mt-3 space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               <Input label="Tanggal tindakan" type="date" max={todayISO()} value={fu.action_date}
                 onChange={(e) => { setFu({ ...fu, action_date: e.target.value }); setFuErrors({ ...fuErrors, action_date: undefined }); }}
                 error={fuErrors.action_date} />
@@ -189,7 +189,7 @@ export default function AlertDetailPage() {
           </>
         }
       >
-        <p className="mb-3 text-sm text-redam">Jelaskan alasan penutupan, misalnya sudah ditangani atau data pengukuran keliru.</p>
+        <p className="mb-2 text-sm text-redam">Jelaskan alasan penutupan, misalnya sudah ditangani atau data pengukuran keliru.</p>
         <Input label="Catatan" value={closeNote} onChange={(e) => { setCloseNote(e.target.value); setCloseError(''); }} error={closeError} />
       </Modal>
     </div>

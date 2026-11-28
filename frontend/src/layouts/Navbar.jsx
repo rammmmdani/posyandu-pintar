@@ -14,7 +14,7 @@ export default function Navbar({ onMenuClick }) {
   };
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center border-b border-garis bg-white px-4 lg:px-8">
+    <header className="sticky top-0 z-20 flex h-14 items-center border-b border-garis bg-white px-3 sm:px-4 lg:px-5">
       <button
         className="rounded-lg p-2 hover:bg-kertas lg:hidden"
         onClick={onMenuClick}
@@ -23,7 +23,7 @@ export default function Navbar({ onMenuClick }) {
         <Menu className="h-6 w-6" />
       </button>
 
-      <div className="ml-auto flex items-center gap-4">
+      <div className="ml-auto flex items-center gap-3">
         {/* Notifikasi */}
         <NotificationBell />
 

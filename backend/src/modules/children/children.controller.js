@@ -27,6 +27,16 @@ export async function setStatus(req, res) {
   sendSuccess(res, { message: 'Status balita berhasil diperbarui', data });
 }
 
+export async function remove(req, res) {
+  await service.deleteChild(req.user, parseId(req.params.id), req.ip);
+  sendSuccess(res, { message: 'Balita berhasil dihapus', data: null });
+}
+
+export async function restore(req, res) {
+  const data = await service.restoreChild(req.user, parseId(req.params.id), req.ip);
+  sendSuccess(res, { message: 'Balita berhasil dipulihkan', data });
+}
+
 export async function listConsents(req, res) {
   const data = await service.listConsents(req.user, parseId(req.params.id));
   sendSuccess(res, { message: 'Data berhasil diambil', data });

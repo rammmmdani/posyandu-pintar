@@ -25,10 +25,10 @@ async function login(email) {
   return r.json.data.token;
 }
 
-let kader; let koordinator; let kaderB; let childId;
+let kader; let koordinator; let kaderB; let koordinatorB; let childId;
 
 before(async () => {
-  // Posyandu kedua dengan satu kader, untuk menguji isolasi data.
+  // Posyandu kedua dengan kader dan koordinator, untuk menguji isolasi data.
   let { rows } = await pool.query("SELECT id FROM posyandus WHERE name = 'Posyandu Uji B'");
   if (!rows[0]) ({ rows } = await pool.query("INSERT INTO posyandus (name) VALUES ('Posyandu Uji B') RETURNING id"));
   const hash = await bcrypt.hash(PASSWORD, 10);
@@ -37,9 +37,15 @@ before(async () => {
      VALUES ($1, 'Kader B', 'kaderb@demo.test', $2, 'kader') ON CONFLICT ((lower(email))) DO NOTHING`,
     [rows[0].id, hash]
   );
+  await pool.query(
+    `INSERT INTO users (posyandu_id, name, email, password_hash, role)
+     VALUES ($1, 'Koordinator B', 'koordinatorb@demo.test', $2, 'koordinator') ON CONFLICT ((lower(email))) DO NOTHING`,
+    [rows[0].id, hash]
+  );
   kader = await login('kader@demo.test');
   koordinator = await login('koordinator@demo.test');
   kaderB = await login('kaderb@demo.test');
+  koordinatorB = await login('koordinatorb@demo.test');
   const list = await call('GET', '/children?limit=1', { token: kader });
   childId = list.json?.data?.[0]?.id;
 });
@@ -51,6 +57,7 @@ const PROTECTED = [
   ['GET', '/children/1/growth'], ['GET', '/children/1/allergies'], ['GET', '/measurements/1'], ['GET', '/alerts'],
   ['GET', '/alerts/1'], ['GET', '/notifications'], ['GET', '/food-items'], ['GET', '/menus/recommendations?child_id=1'],
   ['GET', '/dashboard/summary'], ['GET', '/reports'], ['GET', '/users'], ['POST', '/children'], ['POST', '/reports'], ['POST', '/users'],
+  ['DELETE', '/children/1'], ['PATCH', '/children/1/restore'],
 ];
 
 test('semua endpoint terlindungi menolak permintaan tanpa token', async () => {
@@ -89,6 +96,51 @@ test('fungsi koordinator ditolak untuk kader (403) dan tidak ditolak untuk koord
   }
 });
 
+test('hapus lunak dan pemulihan balita hanya untuk koordinator', async () => {
+  const term = `Hapus Uji ${Date.now()}`;
+  const created = await call('POST', '/children', {
+    token: koordinator,
+    body: {
+      name: term,
+      birth_date: '2024-05-05',
+      gender: 'L',
+      parent_name: 'Wali Hapus',
+      consent: { guardian_name: 'Wali Hapus', notice_version: 'v2' },
+    },
+  });
+  assert.equal(created.status, 201, JSON.stringify(created.json));
+  const id = created.json.data.id;
+
+  try {
+    assert.equal((await call('DELETE', `/children/${id}`, { token: kader })).status, 403);
+    assert.equal((await call('PATCH', `/children/${id}/restore`, { token: kader })).status, 403);
+    assert.equal((await call('GET', '/children?status=terhapus', { token: kader })).status, 403);
+
+    const deleted = await call('DELETE', `/children/${id}`, { token: koordinator });
+    assert.equal(deleted.status, 200);
+    assert.equal(deleted.json.message, 'Balita berhasil dihapus');
+    assert.equal(deleted.json.data, null);
+    assert.equal((await call('GET', `/children/${id}`, { token: koordinator })).status, 404);
+    assert.equal((await call('DELETE', `/children/${id}`, { token: koordinator })).status, 404);
+
+    const trashed = await call('GET', '/children?status=terhapus&limit=100', { token: koordinator });
+    assert.equal(trashed.status, 200);
+    assert.ok(trashed.json.data.some((c) => c.id === id));
+
+    const restored = await call('PATCH', `/children/${id}/restore`, { token: koordinator });
+    assert.equal(restored.status, 200);
+    assert.equal(restored.json.data.id, id);
+    assert.equal((await call('GET', `/children/${id}`, { token: koordinator })).status, 200);
+    assert.equal((await call('PATCH', `/children/${id}/restore`, { token: koordinator })).status, 404);
+
+    const active = await call('GET', '/children?status=terhapus&limit=100', { token: koordinator });
+    assert.ok(!active.json.data.some((c) => c.id === id));
+  } finally {
+    await pool.query('DELETE FROM guardian_consents WHERE child_id = $1', [id]);
+    await pool.query('DELETE FROM children WHERE id = $1', [id]);
+  }
+});
+
 test('data Posyandu lain tidak dapat dibaca atau diubah', async (t) => {
   if (!childId) return t.skip('Tidak ada data balita. Jalankan npm run seed:demo-data');
   const paths = [
@@ -100,6 +152,12 @@ test('data Posyandu lain tidak dapat dibaca atau diubah', async (t) => {
   ];
   for (const [method, path, body] of paths) {
     assert.equal((await call(method, path, { token: kaderB, body })).status, 404, `${method} ${path}`);
+  }
+  for (const [method, path] of [
+    ['DELETE', `/children/${childId}`],
+    ['PATCH', `/children/${childId}/restore`],
+  ]) {
+    assert.equal((await call(method, path, { token: koordinatorB })).status, 404, `${method} ${path}`);
   }
   const list = await call('GET', '/children?limit=100', { token: kaderB });
   assert.equal(list.json.data.length, 0, 'daftar balita Posyandu B harus kosong');
@@ -133,12 +191,143 @@ test('input berbahaya atau aneh pada login tidak menyebabkan galat server', asyn
 
 test('karakter khusus pada pencarian dan ID tidak valid tidak menyebabkan 500', async () => {
   const q = encodeURIComponent("%'\"\\;--");
-  assert.equal((await call('GET', `/children?q=${q}`, { token: kader })).status, 200);
+  assert.equal((await call('GET', `/children?q=${q}&status=semua&single=true`, { token: kader })).status, 200);
   for (const path of ['/children/abc', '/children/99999999999999999999', '/alerts/xyz', '/measurements/-1']) {
     assert.equal((await call('GET', path, { token: kader })).status, 404, path);
   }
   assert.equal((await call('GET', '/reports/xyz/download', { token: koordinator })).status, 404);
   assert.equal((await call('GET', '/children?page=-1', { token: kader })).status, 400);
+});
+
+test('pencarian balita mengembalikan satu hasil terbaik dari semua status', async () => {
+  const term = `Budi Uji ${Date.now()}`;
+  const consent = { guardian_name: 'Wali Uji', method: 'lisan', notice_version: 'v1' };
+  const ids = [];
+  for (const name of [`${term} A`, `${term} B`, term]) {
+    const created = await call('POST', '/children', {
+      token: kader,
+      body: { name, birth_date: '2024-01-01', gender: 'L', parent_name: 'Wali Uji', consent },
+    });
+    assert.equal(created.status, 201, `gagal membuat ${name}`);
+    ids.push(created.json.data.id);
+  }
+  const deactivated = await call('PATCH', `/children/${ids[2]}/status`, { token: kader, body: { status: 'nonaktif' } });
+  assert.equal(deactivated.status, 200);
+
+  const encoded = encodeURIComponent(term);
+  const single = await call('GET', `/children?q=${encoded}&status=semua&single=true`, { token: kader });
+  assert.equal(single.status, 200);
+  assert.equal(single.json.data.length, 1);
+  assert.equal(single.json.data[0].id, ids[2]);
+  assert.equal(single.json.data[0].status, 'nonaktif');
+  assert.equal(single.json.meta.total, 1);
+  assert.equal(single.json.meta.total_pages, 1);
+
+  const all = await call('GET', `/children?q=${encoded}&status=semua&limit=100`, { token: kader });
+  assert.equal(all.status, 200);
+  assert.ok(all.json.data.length >= 3);
+});
+
+test('RT/RW tersimpan, tampil pada daftar dan detail, dapat diubah, dan dapat difilter', async () => {
+  const term = `Wilayah Uji ${Date.now()}`;
+  const enc = encodeURIComponent(term);
+  const consent = { guardian_name: 'Wali Wilayah', method: 'lisan', notice_version: 'v1' };
+  const base = { birth_date: '2024-02-02', gender: 'L', parent_name: 'Wali Wilayah', consent };
+  const create = (name, extra = {}) =>
+    call('POST', '/children', { token: kader, body: { ...base, name, ...extra } });
+
+  const a = await create(`${term} A`, { rt: '001', rw: '002' });
+  const b = await create(`${term} B`, { rt: '001', rw: '003' });
+  const c = await create(`${term} C`, { rt: '010', rw: '002' });
+  const legacy = await create(`${term} D`);
+  for (const r of [a, b, c, legacy]) assert.equal(r.status, 201);
+  assert.equal(a.json.data.rt, '001');
+  assert.equal(a.json.data.rw, '002');
+
+  const stored = await pool.query('SELECT rt, rw FROM children WHERE id = $1', [a.json.data.id]);
+  assert.equal(stored.rows[0].rt, '001');
+  assert.equal(stored.rows[0].rw, '002');
+
+  const detail = await call('GET', `/children/${a.json.data.id}`, { token: kader });
+  assert.equal(detail.status, 200);
+  assert.equal(detail.json.data.rt, '001');
+  assert.equal(detail.json.data.rw, '002');
+
+  const list = async (query) => call('GET', `/children?q=${enc}&status=semua&limit=100${query}`, { token: kader });
+  const all = await list('');
+  assert.equal(all.json.data.length, 4);
+  const byRt = await list('&rt=001');
+  assert.equal(byRt.json.data.length, 2);
+  assert.ok(byRt.json.data.every((row) => row.rt === '001'));
+  const byRw = await list('&rw=002');
+  assert.equal(byRw.json.data.length, 2);
+  assert.ok(byRw.json.data.every((row) => row.rw === '002'));
+  const byBoth = await list('&rt=001&rw=002');
+  assert.equal(byBoth.json.data.length, 1);
+  assert.equal(byBoth.json.data[0].id, a.json.data.id);
+
+  const oldDetail = await call('GET', `/children/${legacy.json.data.id}`, { token: kader });
+  assert.equal(oldDetail.json.data.rt, null);
+  assert.equal(oldDetail.json.data.rw, null);
+
+  assert.equal((await create(`${term} E`, { rt: 'ABC', rw: '002' })).status, 400);
+  assert.equal((await create(`${term} F`, { rt: '0012', rw: '002' })).status, 400);
+  assert.equal((await call('PATCH', `/children/${a.json.data.id}`, { token: kader, body: { rt: '1A2' } })).status, 400);
+  assert.equal((await call('GET', '/children?rt=abc', { token: kader })).status, 400);
+  assert.equal((await call('GET', "/children?rt=001'%20OR%201%3D1--", { token: kader })).status, 400);
+
+  const updated = await call('PATCH', `/children/${a.json.data.id}`, {
+    token: kader,
+    body: { rt: '002', rw: '004' },
+  });
+  assert.equal(updated.status, 200);
+  assert.equal(updated.json.data.rt, '002');
+  assert.equal(updated.json.data.rw, '004');
+  const moved = await list('&rt=002&rw=004');
+  assert.equal(moved.json.data.length, 1);
+  assert.equal(moved.json.data[0].id, a.json.data.id);
+
+  const page1 = await call('GET', `/children?q=${enc}&status=semua&limit=1&page=1`, { token: kader });
+  const page2 = await call('GET', `/children?q=${enc}&status=semua&limit=1&page=2`, { token: kader });
+  assert.equal(page1.json.data.length, 1);
+  assert.equal(page1.json.meta.total, 4);
+  assert.equal(page1.json.meta.total_pages, 4);
+  assert.equal(page2.json.data.length, 1);
+  assert.equal(page2.json.meta.page, 2);
+  assert.notEqual(page2.json.data[0].id, page1.json.data[0].id);
+
+  assert.equal((await call('GET', `/children/${a.json.data.id}`, { token: koordinator })).status, 200);
+  assert.equal(
+    (await call('PATCH', `/children/${a.json.data.id}`, { token: koordinator, body: { rt: '002', rw: '004' } })).status,
+    200
+  );
+});
+
+test('persetujuan baru tersimpan sebagai checklist tanpa memilih metode', async () => {
+  const term = `Checklist Uji ${Date.now()}`;
+  const created = await call('POST', '/children', {
+    token: kader,
+    body: {
+      name: term,
+      birth_date: '2024-04-04',
+      gender: 'P',
+      parent_name: 'Wali Checklist',
+      consent: { guardian_name: 'Wali Checklist', notice_version: 'v2' },
+    },
+  });
+  assert.equal(created.status, 201, JSON.stringify(created.json));
+
+  const id = created.json.data.id;
+  const history = await call('GET', `/children/${id}/consents`, { token: kader });
+  assert.equal(history.status, 200);
+  assert.equal(history.json.data[0].method, 'checklist');
+
+  const withdrawn = await call('POST', `/children/${id}/consents`, {
+    token: kader,
+    body: { consent_status: 'ditarik', guardian_name: 'Wali Checklist', notice_version: 'v2' },
+  });
+  assert.equal(withdrawn.status, 201, JSON.stringify(withdrawn.json));
+  assert.equal(withdrawn.json.data.method, 'checklist');
 });
 
 test('isian terlalu panjang atau terlalu besar ditolak dengan wajar', async () => {

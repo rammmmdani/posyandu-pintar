@@ -6,7 +6,7 @@ const variants = {
 };
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:py-2";
 
 // Dipakai juga untuk <Link>: <Link className={buttonClass('primary')}>
 export const buttonClass = (variant = "primary", extra = "") =>

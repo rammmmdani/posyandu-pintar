@@ -30,6 +30,18 @@ export async function setChildStatus(id, status) {
   return res.data;
 }
 
+export async function deleteChild(id) {
+  if (USE_MOCK) return { success: true, message: 'Balita berhasil dihapus', data: null };
+  const res = await api.delete(`/children/${id}`);
+  return res.data;
+}
+
+export async function restoreChild(id) {
+  if (USE_MOCK) return { success: true, message: 'Balita berhasil dipulihkan', data: null };
+  const res = await api.patch(`/children/${id}/restore`);
+  return res.data;
+}
+
 export async function getConsents(id) {
   const res = await api.get(`/children/${id}/consents`);
   return res.data;

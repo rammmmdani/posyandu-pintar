@@ -63,7 +63,7 @@ export default function NotificationsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Notifikasi</h1>
+      <h1 className="text-xl font-bold">Notifikasi</h1>
       <Select
         label="Tampilkan"
         value={filter}
@@ -71,14 +71,14 @@ export default function NotificationsPage() {
           setPage(1);
           setFilter(e.target.value);
         }}
-        className="mt-4 w-full sm:w-56"
+        className="mt-3 w-full sm:w-48"
       >
         <option value="">Semua</option>
         <option value="false">Belum dibaca</option>
         <option value="true">Sudah dibaca</option>
       </Select>
 
-      <div className="mt-5 space-y-3">
+      <div className="mt-4 space-y-2">
         {state.loading && <Spinner />}
         {state.error && <Alert tone="error">{state.error}</Alert>}
         {!state.loading && !state.error && state.rows.length === 0 && (
@@ -92,7 +92,7 @@ export default function NotificationsPage() {
             key={n.id}
             className={n.is_read ? "" : "border-l-4 border-l-daun-600"}
           >
-            <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
                 <div className="flex items-center gap-2">
                   {!n.is_read && <Badge tone="sukses">Baru</Badge>}

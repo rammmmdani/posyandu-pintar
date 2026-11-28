@@ -6,6 +6,7 @@ import { getErrorMessage } from '../../utils/errors';
 import { formatDate } from '../../utils/format';
 import GrowthChart from '../growth/GrowthChart';
 import GrowthTable from '../growth/GrowthTable';
+import { toneForCategory } from '../growth/growthStatus';
 import Alert from '../../components/ui/Alert';
 import Badge from '../../components/ui/Badge';
 import Card from '../../components/ui/Card';
@@ -39,7 +40,7 @@ export function AssessmentSummary({ assessment }) {
                   </b>
 
                   {ind.category ? (
-                    <Badge tone="netral">
+                    <Badge tone={toneForCategory(ind.category.code, ind.category.label)}>
                       {ind.category.label}
                     </Badge>
                   ) : (
@@ -153,7 +154,7 @@ export default function ChildGrowthSection({ childId, latest }) {
   }
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-3">
       <h2 className="font-semibold">
         Pertumbuhan dan riwayat pengukuran
       </h2>

@@ -24,7 +24,7 @@ export default function ChildAlertsCard({ childId, refreshKey }) {
       </div>
       <ul className="mt-3 divide-y divide-garis">
         {alerts.map((a) => (
-          <li key={a.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
+          <li key={a.id} className="flex flex-wrap items-center justify-between gap-2 py-1.5 text-sm">
             <Link to={`/peringatan/${a.id}`} className="max-w-md hover:underline">{a.message}</Link>
             <span className="flex gap-2"><SeverityBadge severity={a.severity} /><StatusBadge status={a.status} /></span>
           </li>

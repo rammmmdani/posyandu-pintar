@@ -52,16 +52,16 @@ export default function Sidebar({ open, onClose }) {
         />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-garis bg-white transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-56 flex-col border-r border-garis bg-white transition-transform lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-16 items-center justify-between border-b border-garis px-5">
-          <span className="text-lg font-bold text-daun-700">
+        <div className="flex h-14 items-center justify-between border-b border-garis px-4">
+          <span className="text-base font-bold text-daun-700">
             Posyandu Pintar
           </span>
           <button
-            className="rounded-lg p-1 lg:hidden"
+            className="rounded-lg p-2.5 lg:p-1"
             onClick={onClose}
             aria-label="Tutup menu"
           >
@@ -69,7 +69,7 @@ export default function Sidebar({ open, onClose }) {
           </button>
         </div>
 
-        <nav aria-label="Menu utama" className="flex-1 overflow-y-auto p-3">
+        <nav aria-label="Menu utama" className="flex-1 overflow-y-auto p-2">
           <ul className="space-y-1">
             {items.map(({ to, label, icon: Icon }) => (
               <li key={to}>
@@ -77,7 +77,7 @@ export default function Sidebar({ open, onClose }) {
                   to={to}
                   onClick={onClose}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm ${
+                    `flex items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-sm sm:py-2 ${
                       isActive
                         ? "bg-daun-50 font-semibold text-daun-700"
                         : "font-medium text-redam hover:bg-kertas hover:text-tinta"
@@ -92,7 +92,7 @@ export default function Sidebar({ open, onClose }) {
           </ul>
         </nav>
 
-        <p className="border-t border-garis p-4 text-xs text-redam">
+        <p className="border-t border-garis p-3 text-xs text-redam">
           Alat bantu pencatatan dan pemantauan, bukan pengganti penilaian tenaga
           kesehatan.
         </p>

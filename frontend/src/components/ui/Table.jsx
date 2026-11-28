@@ -31,7 +31,7 @@ export default function Table({
               <th
                 key={c.key}
                 scope="col"
-                className={`px-4 py-3 font-semibold ${c.className || ""}`}
+                className={`px-3 py-3 font-semibold sm:py-2 ${c.className || ""}`}
               >
                 {c.header}
               </th>
@@ -42,7 +42,7 @@ export default function Table({
           {rows.map((row) => (
             <tr key={row[rowKey]}>
               {columns.map((c) => (
-                <td key={c.key} className={`px-4 py-3 ${c.className || ""}`}>
+                <td key={c.key} className={`px-3 py-3 sm:py-2 ${c.className || ""}`}>
                   {c.render ? c.render(row) : row[c.key]}
                 </td>
               ))}

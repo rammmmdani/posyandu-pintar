@@ -11,7 +11,7 @@ export default function Checkbox({
   const boxId = id || autoId;
   return (
     <div className={className}>
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2.5">
         <input
           id={boxId}
           type="checkbox"
@@ -25,7 +25,7 @@ export default function Checkbox({
         </label>
       </div>
       {error && (
-        <p id={`${boxId}-error`} className="mt-1 text-sm text-red-700">
+        <p id={`${boxId}-error`} className="mt-1 text-xs text-red-700 sm:text-sm">
           {error}
         </p>
       )}

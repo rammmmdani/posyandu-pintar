@@ -15,9 +15,9 @@ export default function AppLayout() {
         Lewati ke konten
       </a>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="lg:pl-64">
+      <div className="lg:pl-56">
         <Navbar onMenuClick={() => setSidebarOpen(true)} />
-        <main id="konten" className="mx-auto max-w-6xl p-4 lg:p-8">
+        <main id="konten" className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-5">
           <Outlet />
         </main>
       </div>
